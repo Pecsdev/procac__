@@ -1,0 +1,293 @@
+:root {
+  --brand-blue: #1f5c78;
+  --brand-teal: #147d73;
+  --brand-orange: #c59a48;
+  --brand-dark: #15344b;
+  --brand-dark-soft: #24495f;
+  --brand-bg: #f4f6f2;
+  --brand-border: #dce5e0;
+  --brand-text: #233541;
+  --brand-muted: #64757c;
+  --bs-primary: var(--brand-blue);
+  --bs-primary-rgb: 31, 92, 120;
+  --bs-primary-text-emphasis: #15344b;
+  --bs-primary-bg-subtle: #e8f0f3;
+  --bs-primary-border-subtle: #bfd2da;
+  --bs-success: var(--brand-teal);
+  --bs-success-rgb: 20, 125, 115;
+  --bs-success-text-emphasis: #0b625a;
+  --bs-success-bg-subtle: #e5f2ee;
+  --bs-success-border-subtle: #b7d9d0;
+  --bs-warning: var(--brand-orange);
+  --bs-warning-rgb: 197, 154, 72;
+  --bs-light: var(--brand-bg);
+  --bs-light-rgb: 244, 246, 242;
+  --bs-secondary: var(--brand-muted);
+  --bs-secondary-rgb: 100, 117, 124;
+  --bs-dark: var(--brand-dark);
+  --bs-dark-rgb: 21, 52, 75;
+  --bs-link-color: var(--brand-blue);
+  --bs-link-hover-color: var(--brand-teal);
+  --bs-body-bg: var(--brand-bg);
+  --bs-body-color: var(--brand-text);
+  --bs-border-color: var(--brand-border);
+}
+
+body {
+  background-color: var(--brand-bg);
+  color: var(--brand-text);
+}
+
+.home-page,
+.intake-page {
+  background-color: var(--brand-bg) !important;
+  color: var(--brand-text) !important;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--brand-blue);
+  --bs-btn-border-color: var(--brand-blue);
+  --bs-btn-hover-bg: var(--brand-dark);
+  --bs-btn-hover-border-color: var(--brand-dark);
+  --bs-btn-active-bg: var(--brand-dark);
+  --bs-btn-active-border-color: var(--brand-dark);
+}
+
+.btn-success {
+  --bs-btn-bg: var(--brand-teal);
+  --bs-btn-border-color: var(--brand-teal);
+  --bs-btn-hover-bg: #0b625a;
+  --bs-btn-hover-border-color: #0b625a;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--brand-blue);
+  --bs-btn-border-color: var(--brand-blue);
+  --bs-btn-hover-bg: var(--brand-blue);
+  --bs-btn-hover-border-color: var(--brand-blue);
+}
+
+.text-primary,
+.border-primary {
+  color: var(--brand-blue) !important;
+}
+
+.border-primary {
+  border-color: var(--brand-blue) !important;
+}
+
+.text-success {
+  color: var(--brand-teal) !important;
+}
+
+.bg-success {
+  --bs-success: var(--brand-teal);
+  --bs-success-rgb: 20, 125, 115;
+}
+
+.bg-primary {
+  --bs-primary: var(--brand-blue);
+  --bs-primary-rgb: 31, 92, 120;
+}
+
+.bg-dark,
+.text-dark {
+  --bs-dark: var(--brand-dark);
+  --bs-dark-rgb: 21, 52, 75;
+}
+
+.bg-light {
+  --bs-light: var(--brand-bg);
+  --bs-light-rgb: 244, 246, 242;
+}
+
+.form-control,
+.form-select {
+  border-color: var(--brand-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--brand-teal);
+  box-shadow: 0 0 0 0.25rem rgb(20 125 115 / 18%);
+}
+
+.home-page .hero-bg {
+  background-image:
+    linear-gradient(135deg, rgb(16 43 63 / 94%), rgb(31 92 120 / 82%)),
+    url("../images/hero/wochintech.jpg");
+}
+
+.home-page nav,
+.home-page footer,
+.home-page [style*="background-color: #0d3b2f"],
+.home-page [style*="background-color: #103d34"] {
+  background-color: var(--brand-dark) !important;
+}
+
+.home-page [style*="color: #0d3b2f"],
+.home-page [style*="color: #103d34"] {
+  color: var(--brand-dark) !important;
+}
+
+.home-page [style*="color: #2fb77e"] {
+  color: var(--brand-teal) !important;
+}
+
+.home-page .bookmarklet-btn {
+  background-color: var(--brand-teal);
+}
+
+.home-page .bookmarklet-btn:hover {
+  background-color: #0b625a;
+}
+
+.auth-page {
+  background-color: var(--brand-bg) !important;
+  color: var(--brand-text) !important;
+}
+
+.auth-page .card {
+  background-color: #fff !important;
+  border: 1px solid var(--brand-border) !important;
+  color: var(--brand-text) !important;
+}
+
+.auth-page .text-white {
+  color: var(--brand-dark) !important;
+}
+
+.auth-page label,
+.auth-page p,
+.auth-page .text-slate-400,
+.auth-page .text-slate-300 {
+  color: var(--brand-muted) !important;
+}
+
+.auth-page .form-control,
+.auth-page .form-select,
+.auth-page .input-group-text {
+  background-color: #fff !important;
+  border-color: var(--brand-border) !important;
+  color: var(--brand-text) !important;
+}
+
+.auth-page .form-control::placeholder {
+  color: #89979c;
+}
+
+.auth-page [style*="color: #2fb77e"] {
+  color: var(--brand-teal) !important;
+}
+
+.admin-page {
+  background-color: var(--brand-bg) !important;
+  color: var(--brand-text) !important;
+}
+
+.admin-page nav {
+  background-color: var(--brand-dark) !important;
+}
+
+.admin-page .card {
+  background-color: #fff !important;
+  border: 1px solid var(--brand-border) !important;
+  color: var(--brand-text) !important;
+}
+
+.admin-page .card h3.text-white,
+.admin-page .card h4.text-white,
+.admin-page .card h5.text-white,
+.admin-page .table-dark .text-white {
+  color: var(--brand-dark) !important;
+}
+
+.admin-page nav .text-white {
+  color: #fff !important;
+}
+
+.admin-page [style*="background-color: #0f172a"] {
+  background-color: #f4f6f2 !important;
+}
+
+.admin-page [style*="background-color: #334155"] {
+  background-color: var(--brand-border) !important;
+}
+
+.admin-page [style*="border-color: #334155"] {
+  border-color: var(--brand-border) !important;
+}
+
+.admin-page [style*="color: #60a5fa"] {
+  color: #d7b568 !important;
+}
+
+.admin-page .table-dark {
+  --bs-table-bg: #fff;
+  --bs-table-color: var(--brand-text);
+  --bs-table-hover-bg: #f1f5f2;
+  --bs-table-hover-color: var(--brand-text);
+  --bs-table-border-color: var(--brand-border);
+}
+
+.admin-page .table-dark .text-white {
+  color: var(--brand-dark) !important;
+}
+
+.intake-page [style*="background-color: #0d3b2f"],
+.intake-page [style*="background-color: #103d34"] {
+  background-color: var(--brand-dark) !important;
+}
+
+.intake-page [style*="color: #2fb77e"] {
+  color: var(--brand-teal) !important;
+}
+
+.intake-page [style*="background-color: #f1f5f9"] {
+  background-color: #f4f6f2 !important;
+}
+
+.intake-page [style*="border: 1px solid #cbd5e1"] {
+  border-color: var(--brand-border) !important;
+}
+
+.intake-page .entity-card {
+  border-color: var(--brand-border);
+}
+
+.intake-page .entity-card:hover {
+  border-color: var(--brand-teal);
+}
+
+.intake-page .entity-card.active {
+  border-color: var(--brand-teal);
+  background-color: #e5f2ee;
+}
+
+.dashboard-page {
+  background-color: var(--brand-dark) !important;
+}
+
+.dashboard-page .dashboard-navbar {
+  background-color: var(--brand-bg);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+.dashboard-page .dashboard-navbar .navbar-brand {
+  color: var(--brand-dark);
+}
+
+.dashboard-page .dashboard-logo-frame img {
+  display: block;
+  max-height: 40px;
+  width: auto;
+}
+
+.dashboard-page .card-meek {
+  border-color: var(--brand-border);
+}
+
+.dashboard-page .card-dark-blue {
+  background-color: var(--brand-dark);
+  border-color: var(--brand-dark-soft);
+}

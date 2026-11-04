@@ -1,0 +1,651 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include "frontend/favicon.html" %}
+  <title>Create Consultant Account | ProCAC</title>
+  <meta name="description" content="Create a secure ProCAC consultant workspace for automated CAC filings.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="{% static 'frontend/assets/js/encoded-links.js' %}" defer></script>
+  <script src="{% static 'frontend/assets/js/signup.js' %}" defer></script>
+  <style>
+    .signup-page {
+      --signup-blue: #377df5;
+      --signup-ink: #17233c;
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0;
+      color: var(--signup-ink);
+      background: #f7f9fc;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .signup-page *,
+    .signup-page *::before,
+    .signup-page *::after { box-sizing: border-box; }
+
+    .signup-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+
+    .signup-hero {
+      position: relative;
+      isolation: isolate;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      padding: clamp(2rem, 5vw, 4.5rem);
+      color: #fff;
+      background:
+        radial-gradient(ellipse at 78% 20%, rgba(52, 124, 255, .26), transparent 34%),
+        radial-gradient(ellipse at 25% 92%, rgba(23, 89, 205, .24), transparent 38%),
+        linear-gradient(145deg, #0b1530 0%, #101e43 48%, #142e63 100%);
+    }
+
+    .signup-hero::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      opacity: .16;
+      background-image: linear-gradient(rgba(174, 197, 255, .15) 1px, transparent 1px), linear-gradient(90deg, rgba(174, 197, 255, .15) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(135deg, #000, transparent 76%);
+    }
+
+    .signup-brand,
+    .signup-hero-copy,
+    .signup-hero-footer { position: relative; z-index: 1; }
+
+    .signup-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: .85rem;
+      width: fit-content;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .signup-brand-mark {
+      display: block;
+      width: 3.2rem;
+      height: auto;
+      flex: 0 0 auto;
+      object-fit: contain;
+    }
+
+    .signup-wordmark {
+      display: block;
+      width: clamp(8.5rem, 11vw, 10.5rem);
+      height: auto;
+      filter: brightness(0) invert(1);
+    }
+
+    .signup-brand-caption {
+      display: block;
+      margin-top: .38rem;
+      color: #aab8d6;
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .signup-visual {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: grid;
+      width: min(27vw, 21rem);
+      aspect-ratio: 1;
+      place-items: center;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .signup-orbit {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(147, 177, 255, .2);
+      border-radius: 50%;
+      box-shadow: 0 0 48px rgba(51, 117, 244, .12), inset 0 0 48px rgba(51, 117, 244, .08);
+      animation: authorization-pulse 5s ease-in-out infinite;
+    }
+
+    .signup-orbit:nth-child(2) {
+      width: 73%;
+      height: 73%;
+      border-color: rgba(116, 159, 255, .28);
+      animation-delay: -1.6s;
+    }
+
+    .signup-orbit:nth-child(3) {
+      width: 47%;
+      height: 47%;
+      border-color: rgba(116, 159, 255, .36);
+      animation-delay: -3.2s;
+    }
+
+    .authorization-token {
+      position: relative;
+      display: grid;
+      width: 6rem;
+      height: 6rem;
+      place-items: center;
+      border: 1px solid rgba(195, 214, 255, .42);
+      border-radius: 1.8rem;
+      color: #dce8ff;
+      background: linear-gradient(145deg, rgba(99, 148, 255, .35), rgba(33, 72, 152, .48));
+      box-shadow: 0 20px 70px rgba(3, 10, 30, .42), inset 0 1px 0 rgba(255, 255, 255, .24);
+      animation: authorization-float 5s ease-in-out infinite;
+      backdrop-filter: blur(12px);
+    }
+
+    .authorization-token i {
+      font-size: 2.25rem;
+      filter: drop-shadow(0 0 16px rgba(129, 177, 255, .7));
+    }
+
+    .authorization-check {
+      position: absolute;
+      right: -9px;
+      bottom: -7px;
+      display: grid;
+      width: 2rem;
+      height: 2rem;
+      place-items: center;
+      border: 2px solid #142b59;
+      border-radius: 50%;
+      color: #d7fff0;
+      background: #1c9d77;
+      box-shadow: 0 0 20px rgba(52, 211, 153, .45);
+      font-size: .76rem;
+    }
+
+    .signup-hero-copy {
+      max-width: 34rem;
+      margin-top: auto;
+      padding-top: 21rem;
+    }
+
+    .signup-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      margin-bottom: 1.2rem;
+      color: #a9c5ff;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .signup-eyebrow::before {
+      width: 1.35rem;
+      height: 1px;
+      content: "";
+      background: #75a4ff;
+    }
+
+    .signup-hero-copy h1 {
+      max-width: 12ch;
+      margin: 0 0 1rem;
+      font-size: clamp(2.35rem, 4.3vw, 4.2rem);
+      font-weight: 720;
+      letter-spacing: -.055em;
+      line-height: 1.05;
+    }
+
+    .signup-hero-copy p {
+      max-width: 28rem;
+      margin: 0;
+      color: #bdc9e2;
+      font-size: clamp(.98rem, 1.25vw, 1.12rem);
+      line-height: 1.75;
+    }
+
+    .signup-hero-footer {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      margin-top: 2.2rem;
+      color: #a9b8d5;
+      font-size: .78rem;
+    }
+
+    .signup-hero-footer i { color: #81aaff; }
+
+    .signup-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(2rem, 4vw, 4rem);
+      background:
+        radial-gradient(ellipse at 100% 0%, rgba(55, 125, 245, .055), transparent 36%),
+        #fbfcfe;
+    }
+
+    .signup-content { width: 100%; max-width: 37rem; }
+
+    .signup-heading { margin-bottom: 1.6rem; }
+
+    .signup-heading .signup-kicker {
+      margin-bottom: .6rem;
+      color: #4d78c9;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .signup-heading h2 {
+      margin: 0 0 .55rem;
+      color: #15213a;
+      font-size: clamp(1.75rem, 3vw, 2.2rem);
+      font-weight: 720;
+      letter-spacing: -.05em;
+      line-height: 1.15;
+    }
+
+    .signup-heading p { margin: 0; color: #718096; font-size: .9rem; }
+
+    .signup-error {
+      margin-bottom: 1rem;
+      padding: .8rem .9rem;
+      border: 1px solid #fecaca;
+      border-radius: .75rem;
+      color: #991b1b;
+      background: #fef2f2;
+      font-size: .82rem;
+    }
+
+    .signup-error:empty { display: none; }
+
+    .signup-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .95rem .85rem;
+    }
+
+    .signup-field { min-width: 0; }
+    .signup-field-wide { grid-column: 1 / -1; }
+
+    .signup-field label {
+      display: block;
+      margin-bottom: .38rem;
+      color: #34425b;
+      font-size: .77rem;
+      font-weight: 650;
+    }
+
+    .signup-field input {
+      display: block;
+      width: 100%;
+      min-height: 2.9rem;
+      padding: .7rem .82rem;
+      border: 1px solid #e0e6ef;
+      border-radius: .72rem;
+      outline: 0;
+      color: #1b2942;
+      background: #fff;
+      font: inherit;
+      font-size: .84rem;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .signup-field input::placeholder { color: #aab4c3; }
+    .signup-field input:focus { border-color: var(--signup-blue); box-shadow: 0 0 0 .22rem rgba(55, 125, 245, .12); }
+
+    .signup-field input[aria-invalid="true"] { border-color: #dc2626; }
+
+    .signup-field-error { margin-top: .3rem; color: #b91c1c; font-size: .72rem; }
+
+    .signup-terms {
+      display: flex;
+      align-items: flex-start;
+      gap: .58rem;
+      margin: 1.05rem 0;
+      color: #64748b;
+      font-size: .74rem;
+      line-height: 1.55;
+    }
+
+    .signup-terms input {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 auto;
+      margin: .12rem 0 0;
+      accent-color: var(--signup-blue);
+    }
+
+    .signup-terms a,
+    .signup-link {
+      color: #386fd0;
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    .signup-terms a:hover,
+    .signup-link:hover { color: #2455ad; text-decoration: underline; }
+
+    .signup-submit {
+      display: flex;
+      width: 100%;
+      min-height: 3.25rem;
+      align-items: center;
+      justify-content: center;
+      gap: .65rem;
+      padding: .75rem 1rem;
+      border: 0;
+      border-radius: .78rem;
+      color: #fff;
+      background: linear-gradient(110deg, #397df0, #2865d8);
+      box-shadow: 0 10px 22px rgba(51, 111, 220, .2);
+      font: inherit;
+      font-size: .86rem;
+      font-weight: 680;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    }
+
+    .signup-submit:hover:not(:disabled) {
+      filter: brightness(1.04);
+      box-shadow: 0 13px 26px rgba(51, 111, 220, .28);
+      transform: translateY(-1px);
+    }
+
+    .signup-submit:focus-visible,
+    .signup-link:focus-visible,
+    .signup-brand:focus-visible {
+      outline: 3px solid rgba(55, 125, 245, .42);
+      outline-offset: 3px;
+    }
+
+    .signup-submit:disabled { cursor: wait; opacity: .8; }
+
+    .signup-spinner {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: signup-spin .7s linear infinite;
+    }
+
+    .signup-footer {
+      margin-top: 1.25rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid #e8ecf2;
+      color: #7a8799;
+      font-size: .82rem;
+      text-align: center;
+    }
+
+    .signup-back {
+      display: inline-block;
+      margin-top: 1rem;
+      color: #8793a4;
+      font-size: .77rem;
+      text-decoration: none;
+    }
+
+    .signup-back:hover { color: #386fd0; }
+
+    @keyframes authorization-pulse {
+      0%, 100% { opacity: .62; transform: scale(.96); }
+      50% { opacity: 1; transform: scale(1.035); }
+    }
+
+    @keyframes authorization-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-11px); }
+    }
+
+    @keyframes signup-spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 900px) {
+      .signup-shell { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+      .signup-hero { padding: 2.25rem; }
+      .signup-visual { width: min(35vw, 17rem); }
+      .signup-hero-copy { padding-top: 16rem; }
+      .signup-main { padding: 2rem; }
+    }
+
+    @media (max-width: 640px) {
+      .signup-shell { display: flex; flex-direction: column; }
+      .signup-hero { min-height: 14.5rem; padding: 1.5rem 1.4rem; }
+      .signup-brand { gap: .65rem; }
+      .signup-brand-mark { width: 2.8rem; }
+      .signup-wordmark { width: 8rem; }
+      .signup-visual {
+        top: 55%;
+        left: auto;
+        right: 1rem;
+        width: 9.5rem;
+        transform: translateY(-50%);
+      }
+      .authorization-token { width: 3.8rem; height: 3.8rem; border-radius: 1.2rem; }
+      .authorization-token i { font-size: 1.5rem; }
+      .authorization-check { width: 1.5rem; height: 1.5rem; font-size: .6rem; }
+      .signup-hero-copy { max-width: 23rem; padding-top: 2.1rem; }
+      .signup-eyebrow { margin-bottom: .45rem; font-size: .63rem; }
+      .signup-hero-copy h1 { max-width: 16ch; margin-bottom: .45rem; font-size: clamp(1.45rem, 6vw, 1.85rem); }
+      .signup-hero-copy p { max-width: 20rem; font-size: .82rem; line-height: 1.5; }
+      .signup-hero-footer { display: none; }
+      .signup-main { flex: 1; align-items: flex-start; padding: 2rem 1.4rem; }
+      .signup-heading { margin-bottom: 1.35rem; }
+      .signup-form-grid { gap: .85rem .65rem; }
+      .signup-field label { font-size: .73rem; }
+      .signup-field input { min-height: 2.8rem; padding-inline: .7rem; font-size: .8rem; }
+    }
+
+    @media (max-width: 400px) {
+      .signup-form-grid { grid-template-columns: 1fr; }
+      .signup-field-wide { grid-column: auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .signup-orbit,
+      .authorization-token,
+      .signup-spinner { animation: none; }
+      .signup-field input,
+      .signup-submit { transition: none; }
+    }
+  </style>
+</head>
+<body class="signup-page">
+  <main class="signup-shell">
+    <section class="signup-hero" aria-label="Secure consultant onboarding">
+      <a href="{% url 'home' %}" class="signup-brand" aria-label="ProCAC home">
+        <img
+          src="{% static 'frontend/assets/images/logo/favicon-removebg-preview.png' %}"
+          alt=""
+          class="signup-brand-mark"
+        >
+        <span>
+          <img
+            src="{% static 'frontend/assets/images/logo/procac-wordmark.png' %}"
+            alt=""
+            class="signup-wordmark"
+          >
+          <span class="signup-brand-caption">Consultant workspace</span>
+        </span>
+      </a>
+
+      <div class="signup-visual" aria-hidden="true">
+        <span class="signup-orbit"></span>
+        <span class="signup-orbit"></span>
+        <span class="signup-orbit"></span>
+        <span class="authorization-token">
+          <i class="fa-solid fa-fingerprint"></i>
+          <span class="authorization-check"><i class="fa-solid fa-check"></i></span>
+        </span>
+      </div>
+
+      <div class="signup-hero-copy">
+        <div class="signup-eyebrow">Secure access grant</div>
+        <h1>Join elite consultants.</h1>
+        <p>Provision your secure ProCAC consultant workspace in seconds.</p>
+        <div class="signup-hero-footer">
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+          <span>Built for trusted CAC professionals.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="signup-main" aria-labelledby="signup-title">
+      <div class="signup-content">
+        <header class="signup-heading">
+          <div class="signup-kicker">Consultant onboarding</div>
+          <h2 id="signup-title">Create your workspace</h2>
+          <p>Tell us a little about your practice to get started.</p>
+        </header>
+
+        <form method="post" id="signup-form" action="{% url 'signup' %}">
+          {% csrf_token %}
+          <div class="signup-error" id="signup-error" role="alert" aria-live="assertive" hidden></div>
+          {% if messages %}
+            {% for message in messages %}
+              <div class="signup-error" role="alert">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+          {% if form.non_field_errors %}
+            <div class="signup-error" role="alert">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="signup-form-grid">
+            <div class="signup-field">
+              <label for="fullName">Consultant full name</label>
+              <input
+                type="text"
+                id="fullName"
+                name="full_name"
+                value="{{ form.full_name.value|default:'' }}"
+                placeholder="e.g. Ada Okafor"
+                autocomplete="name"
+                maxlength="150"
+                required
+              >
+              {% for error in form.full_name.errors %}<div class="signup-field-error">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="signup-field">
+              <label for="accreditationNo">CAC accreditation number</label>
+              <input
+                type="text"
+                id="accreditationNo"
+                name="accreditation_number"
+                value="{{ form.accreditation_number.value|default:'' }}"
+                placeholder="e.g. NBA/ACC/2026/001"
+                maxlength="100"
+                required
+              >
+              {% for error in form.accreditation_number.errors %}<div class="signup-field-error">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="signup-field signup-field-wide">
+              <label for="signupEmail">Professional email</label>
+              <input
+                type="email"
+                id="signupEmail"
+                name="email"
+                value="{{ form.email.value|default:'' }}"
+                placeholder="you@yourfirm.com"
+                autocomplete="email"
+                maxlength="150"
+                required
+              >
+              {% for error in form.email.errors %}<div class="signup-field-error">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="signup-field">
+              <label for="signupPhone">Phone number</label>
+              <input
+                type="tel"
+                id="signupPhone"
+                name="phone_number"
+                value="{{ form.phone_number.value|default:'' }}"
+                placeholder="+234 800 000 0000"
+                autocomplete="tel"
+                maxlength="30"
+                required
+              >
+              {% for error in form.phone_number.errors %}<div class="signup-field-error">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="signup-field">
+              <label for="firmName">Practice / law firm</label>
+              <input
+                type="text"
+                id="firmName"
+                name="firm_name"
+                value="{{ form.firm_name.value|default:'' }}"
+                placeholder="Your practice name"
+                autocomplete="organization"
+                maxlength="255"
+                required
+              >
+              {% for error in form.firm_name.errors %}<div class="signup-field-error">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="signup-field">
+              <label for="signupPassword">Create password</label>
+              <input
+                type="password"
+                id="signupPassword"
+                name="password1"
+                placeholder="At least 8 characters"
+                autocomplete="new-password"
+                minlength="8"
+                required
+              >
+              {% for error in form.password1.errors %}<div class="signup-field-error">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="signup-field">
+              <label for="confirmPassword">Confirm password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="password2"
+                placeholder="Re-enter password"
+                autocomplete="new-password"
+                minlength="8"
+                required
+              >
+              {% for error in form.password2.errors %}<div class="signup-field-error">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+
+          <label class="signup-terms" for="termsCheck">
+            <input type="checkbox" id="termsCheck" required>
+            <span>I confirm I am an accredited CAC agent and agree to the <a href="#signup-title">service terms</a>.</span>
+          </label>
+
+          <button type="submit" id="signup-submit" class="signup-submit">
+            <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+            <span>Create Consultant Workspace</span>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </form>
+
+        <div class="signup-footer">
+          Already have an account?
+          <a href="{% url 'login' %}" class="signup-link">Sign in</a>
+        </div>
+        <div style="text-align: center">
+          <a href="{% url 'home' %}" class="signup-back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to homepage</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

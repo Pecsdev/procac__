@@ -1,0 +1,1296 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include "frontend/favicon.html" %}
+  <title>Consultant Workspace | ProCAC</title>
+  <meta name="description" content="Manage client CAC registration records and prepare portal autofill payloads.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'frontend/assets/css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'frontend/assets/css/theme.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="{% static 'frontend/assets/js/encoded-links.js' %}" defer></script>
+  {% if payment_required %}
+  <script src="{% static 'frontend/assets/js/payments.js' %}" defer></script>
+  {% endif %}
+  <style>
+    :root {
+      --workspace-bg: #f7f8fa;
+      --workspace-panel: #fff;
+      --workspace-line: #e5e7eb;
+      --workspace-ink: #17191f;
+      --workspace-muted: #697386;
+      --workspace-faint: #8b93a2;
+      --workspace-blue: #2563eb;
+      --workspace-green: #16835d;
+      --sidebar-width: 240px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body.dashboard-page {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background: var(--workspace-bg) !important;
+      color: var(--workspace-ink) !important;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .workspace-sidebar {
+          position: fixed;
+    z-index: 20;
+    inset: 0 auto 0 0;
+    display: flex;
+    width: var(--sidebar-width);
+    flex-direction: column;
+    border-right: 1px solid #1b2742;
+    color: #cbd5e1;
+    background: #1b2742;
+    }
+
+    .workspace-brand {
+      display: flex;
+      min-height: 68px;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--workspace-line);
+      text-decoration: none;
+    }
+
+    .workspace-mark { width: 30px; height: 30px; object-fit: contain; }
+
+    .workspace-wordmark {
+      width: 112px;
+      height: auto;
+      filter: brightness(0) saturate(100%) invert(9%) sepia(13%) saturate(1377%) hue-rotate(184deg) brightness(94%) contrast(93%);
+    }
+
+    .workspace-nav {
+      display: grid;
+      gap: 3px;
+      padding: 0 9px;
+    }
+
+    .workspace-nav-label {
+      padding: 0 10px 8px;
+      color: var(--workspace-faint);
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .workspace-nav a {
+      display: flex;
+      min-height: 36px;
+      align-items: center;
+      gap: 11px;
+      padding: 0 10px;
+      border-radius: 5px;
+      color: #555d6c;
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color .12s ease, background .12s ease;
+    }
+
+    .workspace-nav a i {
+      width: 15px;
+      color: #7c8492;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .workspace-nav a:hover {
+      color: #17191f;
+      background: #f3f4f6;
+    }
+
+    .workspace-nav a[aria-current="page"] {
+      color: #1d4ed8;
+      background: #eef4ff;
+      font-weight: 600;
+    }
+
+    .workspace-nav a[aria-current="page"] i { color: #2563eb; }
+
+    .sidebar-bottom {
+      display: grid;
+      gap: 3px;
+      margin-top: auto;
+      padding: 12px 10px;
+      border-top: 1px solid var(--workspace-line);
+    }
+
+    .sidebar-bottom a {
+      display: flex;
+      min-height: 35px;
+      align-items: center;
+      gap: 11px;
+      padding: 0 10px;
+      border-radius: 5px;
+      color: #606979;
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .sidebar-bottom a i { width: 15px; color: #818998; text-align: center; }
+    .sidebar-bottom a:hover { color: #17191f; background: #f3f4f6; }
+
+    .workspace {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+    }
+
+    .workspace-topbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      min-height: 62px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 0 30px;
+      border-bottom: 1px solid var(--workspace-line);
+      background: rgba(255, 255, 255, .96);
+      backdrop-filter: blur(8px);
+    }
+
+    .breadcrumb-title { color: #7a8290; font-size: 12px; }
+    .breadcrumb-title strong { color: #242832; font-weight: 600; }
+    .topbar-tools { display: flex; align-items: center; gap: 16px; }
+
+    .global-search {
+      display: flex;
+      width: min(280px, 30vw);
+      min-height: 34px;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      border: 1px solid #e3e6eb;
+      border-radius: 5px;
+      color: #8a92a0;
+      background: #fff;
+    }
+
+    .global-search:focus-within {
+      border-color: #9db8f5;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, .09);
+    }
+
+    .global-search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      color: #20232b;
+      background: transparent;
+      font: inherit;
+      font-size: 11px;
+    }
+
+    .global-search input::placeholder { color: #9299a5; }
+    .search-shortcut { color: #9aa1ad; font-size: 10px; white-space: nowrap; }
+
+    .account-menu { position: relative; }
+
+    .account-menu summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #343944;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .account-menu summary::-webkit-details-marker { display: none; }
+
+    .account-initials {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border: 1px solid #dfe3e9;
+      border-radius: 5px;
+      color: #475569;
+      background: #f5f6f8;
+      font-size: 10px;
+      font-weight: 650;
+    }
+
+    .account-name { max-width: 180px; overflow: hidden; font-size: 11px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
+
+    .account-menu summary > i { color: #828a98; font-size: 10px; }
+
+    .account-popover {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      z-index: 12;
+      width: 190px;
+      padding: 5px;
+      border: 1px solid var(--workspace-line);
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
+    }
+
+    .account-popover a,
+    .account-popover button {
+      display: flex;
+      width: 100%;
+      min-height: 34px;
+      align-items: center;
+      gap: 9px;
+      padding: 0 9px;
+      border: 0;
+      border-radius: 4px;
+      color: #404756;
+      background: transparent;
+      font: inherit;
+      font-size: 11px;
+      text-align: left;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .account-popover a:hover,
+    .account-popover button:hover { background: #f4f5f7; }
+    .account-popover .logout-button { color: #b42318; }
+    .account-popover form { margin: 0; }
+
+    .workspace-main {
+      width: min(1260px, 100%);
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    .inline-alert {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border: 1px solid #d9e3f7;
+      border-radius: 5px;
+      color: #34425b;
+      background: #f2f6ff;
+      font-size: 12px;
+    }
+
+    .inline-alert.alert-error {
+      border-color: #f1c7c3;
+      color: #8f2821;
+      background: #fff7f6;
+    }
+
+    .inline-alert.alert-success {
+      border-color: #cae7d8;
+      color: #216645;
+      background: #f4fbf7;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .page-heading h1 {
+      margin: 0 0 3px;
+      color: #17191f;
+      font-size: 21px;
+      font-weight: 650;
+      letter-spacing: -.035em;
+    }
+
+    .page-heading p { margin: 0; color: var(--workspace-muted); font-size: 12px; }
+
+    .flat-button {
+      display: inline-flex;
+      min-height: 34px;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 11px;
+      border: 1px solid #dfe3e8;
+      border-radius: 5px;
+      color: #343a46;
+      background: #fff;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 550;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: border-color .12s ease, background .12s ease;
+    }
+
+    .flat-button:hover { border-color: #b8c0cc; background: #f8f9fa; }
+
+    .flat-button-primary {
+      border-color: #2563eb;
+      color: #fff;
+      background: #2563eb;
+    }
+
+    .flat-button-primary:hover { border-color: #1d4ed8; color: #fff; background: #1d4ed8; }
+    .flat-button-primary:focus-visible,
+    .flat-button:focus-visible,
+    a:focus-visible,
+    summary:focus-visible { outline: 2px solid rgba(37, 99, 235, .55); outline-offset: 2px; }
+
+    .usage-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--workspace-line);
+      background: #fff;
+    }
+
+    .usage-label {
+      min-width: 190px;
+      color: #333946;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .plan-tag {
+      margin-left: 5px;
+      padding: 2px 5px;
+      border: 1px solid #e3e6eb;
+      border-radius: 3px;
+      color: #707888;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .usage-track {
+      height: 5px;
+      flex: 1;
+      overflow: hidden;
+      background: #edf0f3;
+    }
+
+    .usage-fill { height: 100%; background: #4b78d1; }
+    .usage-count { color: #6d7583; font-size: 10px; white-space: nowrap; }
+
+    .allocation-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding-top: 9px;
+      border-top: 1px solid #edf0f3;
+      color: #697386;
+      font-size: 10px;
+    }
+
+    .allocation-row strong { color: #343a46; font-weight: 600; }
+
+    .summary-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      margin-bottom: 20px;
+      border: 1px solid var(--workspace-line);
+      background: #fff;
+    }
+
+    .summary-item {
+      display: flex;
+      min-width: 150px;
+      align-items: baseline;
+      gap: 9px;
+      padding: 10px 14px;
+      border-right: 1px solid var(--workspace-line);
+    }
+
+    .summary-item:last-child { border-right: 0; }
+    .summary-item h3 { margin: 0; color: #1b1e25; font-size: 16px; font-weight: 650; }
+    .summary-item span { color: #697386; font-size: 10px; }
+
+    .records-toolbar {
+      display: flex;
+      min-height: 55px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 13px;
+      border: 1px solid var(--workspace-line);
+      border-bottom: 0;
+      background: #fff;
+    }
+
+    .records-title { margin: 0; color: #242832; font-size: 12px; font-weight: 600; }
+    .records-meta { margin-left: 7px; color: #838b98; font-size: 10px; font-weight: 400; }
+    .record-filters { display: flex; align-items: center; gap: 8px; }
+
+    .filter-select {
+      min-height: 31px;
+      padding: 0 25px 0 9px;
+      border: 1px solid #e1e4e9;
+      border-radius: 4px;
+      color: #505968;
+      background: #fff;
+      font: inherit;
+      font-size: 10px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--workspace-line);
+      background: #fff;
+    }
+
+    .client-table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      color: #303541;
+      font-size: 11px;
+      text-align: left;
+    }
+
+    .client-table th {
+      height: 36px;
+      padding: 0 13px;
+      border-bottom: 1px solid var(--workspace-line);
+      color: #707887;
+      background: #fafbfc;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .client-table td {
+      height: 56px;
+      padding: 8px 13px;
+      border-bottom: 1px solid #edf0f3;
+      vertical-align: middle;
+    }
+
+    .client-table tbody tr:last-child td { border-bottom: 0; }
+    .client-table tbody tr:hover { background: #fbfcfe; }
+    .client-name { color: #252a34; font-size: 11px; font-weight: 600; }
+    .client-email { display: block; margin-top: 2px; color: #818a98; font-size: 10px; }
+    .entity-code { color: #495263; font-weight: 600; }
+    .entity-name { display: block; margin-top: 2px; color: #818a98; font-size: 9px; }
+
+    .nin-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #687282;
+      font-size: 10px;
+    }
+
+    .nin-state::before { width: 6px; height: 6px; border-radius: 50%; background: #c4cad3; content: ""; }
+    .nin-state.available { color: #23734c; }
+    .nin-state.available::before { background: #2e9b65; }
+    .created-date { color: #687282; font-size: 10px; white-space: nowrap; }
+    .intake-status { display: block; margin-top: 3px; font-size: 9px; font-weight: 600; }
+    .intake-status.pending { color: #946200; }
+    .intake-status.submitted { color: #16835d; }
+
+    .inject-button {
+      display: inline-flex;
+      min-height: 29px;
+      align-items: center;
+      padding: 0 8px;
+      border: 1px solid #d7e1f3;
+      border-radius: 4px;
+      color: #2359b7;
+      background: #f7f9fd;
+      font: inherit;
+      font-size: 10px;
+      font-weight: 550;
+      white-space: nowrap;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .inject-button:hover { border-color: #9db8e8; background: #eff4fc; }
+    .inject-button:disabled { cursor: not-allowed; opacity: .7; }
+    .inject-target { display: block; margin-top: 2px; color: #9299a5; font-size: 8px; text-align: right; }
+
+    .empty-state {
+      padding: 36px 16px !important;
+      color: #768091;
+      text-align: center;
+    }
+
+    .empty-state strong { display: block; margin-bottom: 4px; color: #3a404b; font-size: 12px; font-weight: 600; }
+
+    .table-footer {
+      display: flex;
+      min-height: 39px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 13px;
+      border: 1px solid var(--workspace-line);
+      border-top: 0;
+      color: #7b8492;
+      background: #fff;
+      font-size: 10px;
+    }
+
+    .payment-alert {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 12px;
+      border: 1px solid #f1d7a8;
+      color: #78551e;
+      background: #fffaf0;
+      font-size: 11px;
+    }
+
+    .payment-error {
+      margin: 10px 0 0;
+      padding: 9px 10px;
+      border: 1px solid #f1c7c3;
+      color: #8f2821;
+      background: #fff7f6;
+      font-size: 11px;
+    }
+    .payment-error.success { border-color: #cae7d8; color: #216645; background: #f4fbf7; }
+
+    .modal-content { border: 1px solid #dfe3e8 !important; border-radius: 6px !important; box-shadow: 0 12px 36px rgba(15, 23, 42, .18) !important; }
+    .modal-header { border-bottom: 1px solid #e5e7eb; }
+    .modal-footer { border-top: 1px solid #e5e7eb; }
+    .form-label { color: #000; }
+
+    @media (max-width: 900px) {
+      :root { --sidebar-width: 64px; }
+      .workspace-brand { justify-content: center; padding-inline: 8px; }
+      .workspace-mark { width: 31px; height: 31px; }
+      .workspace-wordmark,
+      .workspace-nav-label,
+      .workspace-nav a span,
+      .sidebar-bottom a span { display: none; }
+      .workspace-nav { padding-inline: 8px; }
+      .workspace-nav a,
+      .sidebar-bottom a { justify-content: center; padding-inline: 0; }
+      .workspace-nav a i,
+      .sidebar-bottom a i { width: auto; font-size: 14px; }
+      .workspace-topbar { padding-inline: 20px; }
+      .workspace-main { padding: 24px 20px; }
+      .account-name { max-width: 130px; }
+    }
+
+    @media (max-width: 600px) {
+      :root { --sidebar-width: 0px; }
+      .workspace-sidebar {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 54px;
+        flex-direction: row;
+        border-right: 0;
+        border-bottom: 1px solid var(--workspace-line);
+      }
+      .workspace-brand { min-height: 53px; width: 54px; flex: 0 0 54px; border-bottom: 0; border-right: 1px solid var(--workspace-line); }
+      .workspace-nav { display: flex; flex: 1; align-items: center; justify-content: space-around; gap: 2px; padding: 0 5px; }
+      .workspace-nav a { min-width: 34px; min-height: 36px; }
+      .sidebar-bottom { display: none; }
+      .workspace { margin-left: 0; }
+      .workspace-topbar { position: relative; min-height: 54px; gap: 8px; padding-inline: 12px; }
+      .breadcrumb-title { font-size: 10px; }
+      .topbar-tools { gap: 9px; }
+      .global-search { width: min(42vw, 180px); min-height: 31px; }
+      .search-shortcut { display: none; }
+      .account-name { display: none; }
+      .workspace-main { padding: 20px 12px; }
+      .page-heading { align-items: flex-start; }
+      .page-heading h1 { font-size: 19px; }
+      .usage-row { flex-wrap: wrap; gap: 9px; }
+      .usage-label { min-width: 0; }
+      .usage-track { min-width: 100px; }
+      .summary-item { min-width: 33.333%; flex: 1; padding-inline: 9px; }
+      .records-toolbar { align-items: flex-start; flex-direction: column; }
+      .record-filters { width: 100%; }
+      .filter-select { flex: 0 0 130px; }
+      .payment-alert { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body class="dashboard-page">
+  {% if payment_required %}<form id="payment-csrf-token" hidden>{% csrf_token %}</form>{% endif %}
+
+  <aside class="workspace-sidebar" aria-label="Workspace sidebar">
+    <a class="workspace-brand" href="{% url 'home' %}" aria-label="ProCAC home">
+      <img class="workspace-mark" src="{% static 'frontend/assets/images/logo/favicon-removebg-preview.png' %}" alt="">
+      <img class="workspace-wordmark" src="{% static 'frontend/assets/images/logo/procac-wordmark.png' %}" alt="ProCAC">
+    </a>
+    <nav class="workspace-nav" aria-label="Workspace navigation">
+      <span class="workspace-nav-label">Workspace</span>
+      <a href="{% url 'dashboard' %}" aria-current="page" title="Clients"><i class="fa-solid fa-table-list" aria-hidden="true"></i><span>Clients</span></a>
+      <a href="{% url 'intake' %}" title="New intake"><i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>New intake</span></a>
+      <a href="{% url 'agency_profile' %}" title="Agency profile"><i class="fa-regular fa-building" aria-hidden="true"></i><span>Agency profile</span></a>
+      <a href="{% url 'plans' %}" title="Plans & billing"><i class="fa-regular fa-credit-card" aria-hidden="true"></i><span>Plans &amp; billing</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="{% url 'home' %}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><span>Open ProCAC site</span></a>
+    </div>
+  </aside>
+
+  <div class="workspace">
+    <header class="workspace-topbar">
+      <div class="breadcrumb-title">Workspace <span aria-hidden="true">/</span> <strong>Consultant Workspace</strong></div>
+      <div class="topbar-tools">
+        <label class="global-search" for="clientSearch">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input type="search" id="clientSearch" placeholder="Search client records..." autocomplete="off">
+          <span class="search-shortcut">⌘ K</span>
+        </label>
+        <details class="account-menu">
+          <summary aria-label="User account menu">
+            <span class="account-initials" aria-hidden="true">{{ request.user.get_full_name|default:request.user.email|slice:":1"|upper }}</span>
+            <span class="account-name">{{ request.user.get_full_name|default:request.user.email }}</span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </summary>
+          <div class="account-popover">
+            <a href="{% url 'agency_profile' %}"><i class="fa-regular fa-building" aria-hidden="true"></i> Agency profile</a>
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="logout-button"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Sign out</button>
+            </form>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <main class="workspace-main" id="workspace">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="inline-alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}" role="status">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      {% if payment_required %}
+        <div class="payment-alert" role="alert">
+          <span>{% if payment_error %}{{ payment_error }}{% else %}Your account is ready, but your initial subscription checkout could not be started. Choose a plan to activate your account.{% endif %}</span>
+          <button type="button" class="flat-button flat-button-primary" data-subscribe-plan="{{ request.user.consultant_profile.plan }}" data-payment-error-target="#dashboard-payment-error">Retry subscription checkout</button>
+        </div>
+        <div id="dashboard-payment-error" class="payment-error" role="alert" aria-live="assertive" hidden><span data-payment-error-message></span></div>
+      {% endif %}
+
+      <div class="page-heading">
+        <div>
+          <h1>Consultant Workspace</h1>
+          <p>Manage your client records and prepare CAC portal filings.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="flat-button" data-bs-toggle="modal" data-bs-target="#createIntakeLinkModal">
+            <i class="fa-solid fa-link" aria-hidden="true"></i> Create intake link
+          </button>
+          <button type="button" class="flat-button flat-button-primary" data-bs-toggle="modal" data-bs-target="#newClientModal">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> Add client
+          </button>
+        </div>
+      </div>
+
+      <section class="usage-row" aria-label="Subscription usage">
+        <div class="usage-label">{{ active_plan }} Plan <span class="plan-tag">Active</span></div>
+        {% if profile_limit %}
+          <div class="usage-track" role="progressbar" aria-label="Client profile allocation" aria-valuemin="0" aria-valuemax="{{ profile_limit }}" aria-valuenow="{{ total_clients }}">
+            <div class="usage-fill" style="width: {{ profile_usage_percent }}%"></div>
+          </div>
+        {% else %}
+          <div class="usage-track" role="img" aria-label="Unlimited client profile allocation"></div>
+        {% endif %}
+        <div class="usage-count">{{ profile_usage }}</div>
+        {% if entity_profile_limits %}
+          <div class="allocation-row">
+            <span><strong>BN</strong> {{ business_name_count }}/{{ entity_profile_capacities.BN }}</span>
+            <span><strong>LTD</strong> {{ limited_company_count }}/{{ entity_profile_capacities.LTD }}</span>
+            <span><strong>IT</strong> {{ incorporated_trustee_count }}/{{ entity_profile_capacities.IT }}</span>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="summary-strip" aria-label="Client summary">
+        <div class="summary-item"><h3>{{ total_clients|default:0 }}</h3><span>Total clients</span></div>
+        <div class="summary-item"><h3>{{ ready_for_fill|default:0 }}</h3><span>Ready for portal</span></div>
+        <div class="summary-item"><h3>{{ registered_clients|default:0 }}</h3><span>Registered</span></div>
+      </section>
+
+      <section id="clients" aria-labelledby="records-title">
+        <div class="records-toolbar">
+          <h2 class="records-title" id="records-title">Client records <span class="records-meta">{{ client_record_count }} total</span></h2>
+          <div class="record-filters">
+            <select class="filter-select" id="filterType" aria-label="Filter by registration type">
+              <option value="ALL">All registration types</option>
+              <option value="BN">Business Name (BN)</option>
+              <option value="LTD">Private Limited (LTD)</option>
+              <option value="IT">Incorporated Trustee (IT)</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="client-table">
+            <thead>
+              <tr>
+                <th scope="col">Client name</th>
+                <th scope="col">Registration type</th>
+                <th scope="col">NIN status</th>
+                <th scope="col">Date created</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody id="clientTableBody">
+              {% for client in client_profiles %}
+                <tr data-type="{{ client.entity_type }}" data-search="{{ client.entity_name|lower }} {{ client.email|lower }} {{ client.entity_type|lower }}" data-intake-link-id="{{ client.intake_link_id|default:'' }}">
+                  <td>
+                    <span class="client-name">{{ client.entity_name }}</span>
+                    <span class="client-email">{{ client.email }}</span>
+                    {% if client.intake_link_id %}<span class="intake-status submitted">Client Submitted · Ready for CAC Injection</span>{% endif %}
+                  </td>
+                  <td><span class="entity-code">{{ client.entity_type }}</span><span class="entity-name">{{ client.get_entity_type_display }}</span></td>
+                  <td>
+                    {% if client.nin %}
+                      <span class="nin-state available">NIN on file</span>
+                    {% else %}
+                      <span class="nin-state">Not provided</span>
+                    {% endif %}
+                  </td>
+                  <td><time class="created-date" datetime="{{ client.created_at|date:'c' }}">{{ client.created_at|date:"M j, Y" }}</time></td>
+                  <td>
+                    {% if client.status == 'DRAFT' %}
+                      <a class="inject-button" href="{% url 'intake' %}?draft={{ client.pk }}">Resume draft</a>
+                      <span class="inject-target">Draft · not in extension</span>
+                    {% else %}
+                      <button
+                        type="button"
+                        class="inject-button"
+                        data-client-name="{{ client.entity_name }}"
+                        data-client-type="{{ client.entity_type }}"
+                        data-client-nin="{{ client.nin }}"
+                        onclick="openScriptModalFromButton(this)"
+                      >{% if client.intake_link_id %}Inject Payload to Portal{% else %}Inject to Portal{% endif %}</button>
+                      <span class="inject-target">crp.cac.gov.ng</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+              {% for intake_link in pending_intake_links %}
+                <tr
+                  class="intake-pending-row"
+                  data-type="{{ intake_link.filing_type }}"
+                  data-search="{{ intake_link.client_name_hint|default:'awaiting client submission'|lower }} {{ intake_link.filing_type|lower }}"
+                  data-intake-link-id="{{ intake_link.pk }}"
+                >
+                  <td>
+                    <span class="client-name">{{ intake_link.client_name_hint|default:"Awaiting client submission" }}</span>
+                    <span class="intake-status pending">Link Sent / Pending Client Entry</span>
+                  </td>
+                  <td><span class="entity-code">{{ intake_link.filing_type }}</span><span class="entity-name">{{ intake_link.get_filing_type_display }}</span></td>
+                  <td><span class="nin-state">Awaiting submission</span></td>
+                  <td><time class="created-date" datetime="{{ intake_link.created_at|date:'c' }}">{{ intake_link.created_at|date:"M j, Y" }}</time></td>
+                  <td><span class="inject-target">Link expires {{ intake_link.expires_at|date:"M j, Y" }}</span></td>
+                </tr>
+              {% endfor %}
+              {% if not client_profiles and not pending_intake_links %}
+                <tr>
+                  <td colspan="5" class="empty-state"><strong>No client records yet</strong>Add a client to prepare a CAC filing and make the profile available to your extension.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span id="visibleClientCount">Showing {{ client_record_count }} client records</span>
+          <span>Records are private to your workspace</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal fade" id="createIntakeLinkModal" tabindex="-1" aria-labelledby="createIntakeLinkTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5 fw-semibold" id="createIntakeLinkTitle">Create secure client intake link</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="small text-secondary">Secure link generated • Expires in 10 hours for maximum data privacy. Each link can be used once.</p>
+          <div class="mb-3">
+            <label class="form-label" for="intakeFilingType">Filing type</label>
+            <select class="form-select" id="intakeFilingType" required>
+              <option value="BN">Business Name</option>
+              <option value="LTD">Limited Liability</option>
+              <option value="IT">Incorporated Trustee</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="intakeClientHint">Client reference <span class="text-secondary">(optional, internal)</span></label>
+            <input class="form-control" id="intakeClientHint" maxlength="255" autocomplete="off">
+          </div>
+          <div id="intakeLinkError" class="payment-error" role="alert" hidden></div>
+          <div id="intakeLinkResult" class="mt-3" hidden>
+            <label class="form-label" for="generatedIntakeUrl">Share this link</label>
+            <input class="form-control mb-2" id="generatedIntakeUrl" readonly>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="flat-button" id="copyIntakeLinkButton"><i class="fa-regular fa-copy" aria-hidden="true"></i> Copy link</button>
+              <a class="flat-button flat-button-primary" id="shareIntakeLinkWhatsApp" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Share on WhatsApp</a>
+            </div>
+          </div>
+          <button type="button" class="flat-button flat-button-primary mt-3" id="generateIntakeLinkButton">
+            <i class="fa-solid fa-link" aria-hidden="true"></i> Generate link
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="scriptModal" tabindex="-1" aria-labelledby="scriptModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <div class="text-uppercase text-secondary small mb-1">Portal handoff</div>
+            <h2 class="modal-title fs-5 fw-semibold" id="scriptModalTitle">Prepare client autofill</h2>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="mb-3">Selected record: <strong id="modalClientName"></strong> <span class="text-secondary">(<span id="modalClientType"></span>)</span></p>
+          <p class="small text-secondary">Open the matching form on crp.cac.gov.ng, then use the bookmarklet or copy the generated payload. Review all values before submitting to CAC.</p>
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <a href="javascript:(function(){alert('Auto-filling client data...');})()" class="flat-button flat-button-primary bookmarklet-btn">
+              <i class="fa-solid fa-bookmark" aria-hidden="true"></i> Fill: <span id="bookmarkletLabel"></span>
+            </a>
+            <button type="button" class="flat-button" onclick="copyPayload()"><i class="fa-regular fa-copy" aria-hidden="true"></i> Copy payload</button>
+          </div>
+          <label for="scriptPayloadBox" class="form-label small fw-semibold">JavaScript payload</label>
+          <textarea class="form-control font-monospace" rows="7" id="scriptPayloadBox" readonly></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="flat-button" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="newClientModal"
+    data-show-on-load="{% if client_profile_form.errors %}true{% else %}false{% endif %}"
+    tabindex="-1"
+    aria-labelledby="newClientModalTitle"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <div class="text-uppercase text-secondary small mb-1">Client directory</div>
+            <h2 class="modal-title fs-5 fw-semibold" id="newClientModalTitle">Add CAC registration profile</h2>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form method="post" action="{% url 'dashboard' %}" id="clientProfileForm">
+            {% csrf_token %}
+            {{ client_profile_form.entity_name }}
+            {{ client_profile_form.directors_json }}
+            {% if client_profile_form.non_field_errors %}<div class="alert alert-danger">{{ client_profile_form.non_field_errors }}</div>{% endif %}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="id_entity_type">Registration type</label>
+                {{ client_profile_form.entity_type }}
+                {% for error in client_profile_form.entity_type.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="proposed_name_1">Client / proposed name</label>
+                <input id="proposed_name_1" name="proposed_name_1" class="form-control" value="{{ client_profile_form.proposed_name_1.value|default:client_profile_form.entity_name.value|default:'' }}" maxlength="255" required>
+                {% for error in client_profile_form.entity_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                {% for error in client_profile_form.proposed_name_1.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="proposed_name_2">Alternative proposed name</label>
+                <input id="proposed_name_2" name="proposed_name_2" class="form-control" value="{{ client_profile_form.proposed_name_2.value|default:'' }}" maxlength="255">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="clientEmail">Contact email</label>
+                <input id="clientEmail" type="email" name="email" class="form-control" value="{{ client_profile_form.email.value|default:'' }}" required>
+                {% for error in client_profile_form.email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="nin">Primary NIN (optional)</label>
+                <input id="nin" name="nin" class="form-control font-monospace" value="{{ client_profile_form.nin.value|default:'' }}" inputmode="numeric" pattern="[0-9]{11}" maxlength="11">
+                {% for error in client_profile_form.nin.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="clientPhone">Phone</label>
+                <input id="clientPhone" type="tel" name="phone" class="form-control" value="{{ client_profile_form.phone.value|default:'' }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="classification">Classification</label>
+                <input id="classification" name="classification" class="form-control" value="{{ client_profile_form.classification.value|default:'' }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="business_type">Business type</label>
+                <input id="business_type" name="business_type" class="form-control" value="{{ client_profile_form.business_type.value|default:'' }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="nature_category">Nature category</label>
+                <input id="nature_category" name="nature_category" class="form-control" value="{{ client_profile_form.nature_category.value|default:'' }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="specific_nature">Specific nature</label>
+                <input id="specific_nature" name="specific_nature" class="form-control" value="{{ client_profile_form.specific_nature.value|default:'' }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="street_address">Street address</label>
+                <input id="street_address" name="street_address" class="form-control" value="{{ client_profile_form.street_address.value|default:'' }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="city">City</label>
+                <input id="city" name="city" class="form-control" value="{{ client_profile_form.city.value|default:'' }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="lga">LGA</label>
+                <input id="lga" name="lga" class="form-control" value="{{ client_profile_form.lga.value|default:'' }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="state">State</label>
+                <input id="state" name="state" class="form-control" value="{{ client_profile_form.state.value|default:'' }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="commencement_date">Commencement date</label>
+                <input id="commencement_date" type="date" name="commencement_date" class="form-control" value="{{ client_profile_form.commencement_date.value|default:'' }}">
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="objectives">Objectives / description</label>
+                <textarea id="objectives" name="objectives" class="form-control" rows="3">{{ client_profile_form.objectives.value|default:'' }}</textarea>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save client record</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function openScriptModal(name, type, nin) {
+      document.getElementById("modalClientName").textContent = name;
+      document.getElementById("modalClientType").textContent = type;
+      document.getElementById("bookmarkletLabel").textContent = name.length > 18
+        ? `${name.slice(0, 15)}...`
+        : name;
+      document.getElementById("scriptPayloadBox").value =
+        `document.querySelector('#option1').value = ${JSON.stringify(name.toUpperCase())};\n` +
+        `document.querySelector('#nin').value = ${JSON.stringify(nin)};\n` +
+        `document.querySelector('#entityType').value = ${JSON.stringify(type)};\n` +
+        `console.log("Successfully populated " + ${JSON.stringify(type)} + " form.");`;
+
+      bootstrap.Modal.getOrCreateInstance(document.getElementById("scriptModal")).show();
+    }
+
+    function openScriptModalFromButton(button) {
+      openScriptModal(
+        button.dataset.clientName,
+        button.dataset.clientType,
+        button.dataset.clientNin,
+      );
+    }
+
+    async function copyPayload() {
+      const payload = document.getElementById("scriptPayloadBox");
+      try {
+        await navigator.clipboard.writeText(payload.value);
+        window.alert("Autofill payload copied to clipboard.");
+      } catch (error) {
+        payload.focus();
+        payload.select();
+        const copied = document.execCommand("copy");
+        if (!copied) {
+          window.alert("Copy failed. Select and copy the payload manually.");
+          return;
+        }
+        window.alert("Autofill payload copied to clipboard.");
+      }
+    }
+
+    function filterClients() {
+      const typeFilter = document.getElementById("filterType").value;
+      const query = document.getElementById("clientSearch").value.trim().toLowerCase();
+      const rows = [...document.querySelectorAll("#clientTableBody tr[data-type]")];
+      let visible = 0;
+
+      rows.forEach((row) => {
+        const matchesType = typeFilter === "ALL" || row.dataset.type === typeFilter;
+        const matchesQuery = !query || row.dataset.search.includes(query);
+        row.hidden = !(matchesType && matchesQuery);
+        if (!row.hidden) visible += 1;
+      });
+
+      document.getElementById("visibleClientCount").textContent =
+        `Showing ${visible} of ${rows.length} client records`;
+      document.querySelector(".records-meta").textContent = `${rows.length} total`;
+    }
+
+    function appendTextCell(row, className, value) {
+      const cell = document.createElement("td");
+      const text = document.createElement("span");
+      text.className = className;
+      text.textContent = value;
+      cell.appendChild(text);
+      row.appendChild(cell);
+      return cell;
+    }
+
+    function addPendingIntakeRow(link) {
+      const tableBody = document.getElementById("clientTableBody");
+      const existing = tableBody.querySelector(`[data-intake-link-id="${link.id}"]`);
+      if (existing) return existing;
+
+      const emptyState = tableBody.querySelector(".empty-state");
+      if (emptyState) emptyState.closest("tr").remove();
+
+      const row = document.createElement("tr");
+      row.className = "intake-pending-row";
+      row.dataset.type = link.filing_type;
+      row.dataset.search = `${link.client_name_hint || "awaiting client submission"} ${link.filing_type}`.toLowerCase();
+      row.dataset.intakeLinkId = link.id;
+
+      const nameCell = appendTextCell(
+        row,
+        "client-name",
+        link.client_name_hint || "Awaiting client submission",
+      );
+      const pendingLabel = document.createElement("span");
+      pendingLabel.className = "intake-status pending";
+      pendingLabel.textContent = "Link Sent / Pending Client Entry";
+      nameCell.appendChild(pendingLabel);
+
+      const typeCell = document.createElement("td");
+      const typeCode = document.createElement("span");
+      typeCode.className = "entity-code";
+      typeCode.textContent = link.filing_type;
+      const typeName = document.createElement("span");
+      typeName.className = "entity-name";
+      typeName.textContent = link.filing_type_label;
+      typeCell.append(typeCode, typeName);
+      row.appendChild(typeCell);
+
+      appendTextCell(row, "nin-state", "Awaiting submission");
+      const dateCell = document.createElement("td");
+      const date = document.createElement("time");
+      date.className = "created-date";
+      date.dateTime = link.created_at;
+      date.textContent = new Date(link.created_at).toLocaleDateString();
+      dateCell.appendChild(date);
+      row.appendChild(dateCell);
+      appendTextCell(
+        row,
+        "inject-target",
+        `Link expires ${new Date(link.expires_at).toLocaleDateString()}`,
+      );
+
+      tableBody.appendChild(row);
+      filterClients();
+      return row;
+    }
+
+    function markIntakeLinkSubmitted(link) {
+      if (!link.client) return;
+      const row = document.querySelector(
+        `#clientTableBody tr[data-intake-link-id="${link.id}"]`,
+      );
+      if (!row || !row.classList.contains("intake-pending-row")) return;
+
+      row.className = "";
+      row.dataset.type = link.client.entity_type;
+      row.dataset.search =
+        `${link.client.entity_name} ${link.client.email} ${link.client.entity_type}`.toLowerCase();
+      row.replaceChildren();
+
+      const nameCell = appendTextCell(row, "client-name", link.client.entity_name);
+      const email = document.createElement("span");
+      email.className = "client-email";
+      email.textContent = link.client.email;
+      nameCell.appendChild(email);
+      const submittedLabel = document.createElement("span");
+      submittedLabel.className = "intake-status submitted";
+      submittedLabel.textContent = "Client Submitted · Ready for CAC Injection";
+      nameCell.appendChild(submittedLabel);
+
+      const typeCell = document.createElement("td");
+      const typeCode = document.createElement("span");
+      typeCode.className = "entity-code";
+      typeCode.textContent = link.client.entity_type;
+      const typeName = document.createElement("span");
+      typeName.className = "entity-name";
+      typeName.textContent = link.filing_type_label;
+      typeCell.append(typeCode, typeName);
+      row.appendChild(typeCell);
+      appendTextCell(
+        row,
+        link.client.nin ? "nin-state available" : "nin-state",
+        link.client.nin ? "NIN on file" : "Not provided",
+      );
+
+      const dateCell = document.createElement("td");
+      const date = document.createElement("time");
+      date.className = "created-date";
+      date.dateTime = link.client.created_at;
+      date.textContent = new Date(link.client.created_at).toLocaleDateString();
+      dateCell.appendChild(date);
+      row.appendChild(dateCell);
+
+      const actionCell = document.createElement("td");
+      const injectButton = document.createElement("button");
+      injectButton.type = "button";
+      injectButton.className = "inject-button";
+      injectButton.textContent = "Inject Payload to Portal";
+      injectButton.dataset.clientName = link.client.entity_name;
+      injectButton.dataset.clientType = link.client.entity_type;
+      injectButton.dataset.clientNin = link.client.nin;
+      injectButton.addEventListener("click", () => openScriptModalFromButton(injectButton));
+      actionCell.appendChild(injectButton);
+      const target = document.createElement("span");
+      target.className = "inject-target";
+      target.textContent = "crp.cac.gov.ng";
+      actionCell.appendChild(target);
+      row.appendChild(actionCell);
+      filterClients();
+    }
+
+    async function refreshIntakeLinkStatuses() {
+      try {
+        const response = await fetch("{% url 'intake_link_status' %}", {
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) {
+          throw new Error(`Status refresh failed with HTTP ${response.status}.`);
+        }
+        const data = await response.json();
+        data.links.forEach((link) => {
+          if (link.is_used) markIntakeLinkSubmitted(link);
+        });
+      } catch (error) {
+        console.error("Could not refresh client intake link statuses.", error);
+      }
+    }
+
+    const generateIntakeLinkButton = document.getElementById("generateIntakeLinkButton");
+    const intakeLinkError = document.getElementById("intakeLinkError");
+    const intakeLinkResult = document.getElementById("intakeLinkResult");
+    const generatedIntakeUrl = document.getElementById("generatedIntakeUrl");
+
+    generateIntakeLinkButton.addEventListener("click", async () => {
+      generateIntakeLinkButton.disabled = true;
+      intakeLinkError.hidden = true;
+      intakeLinkError.classList.remove("success");
+      intakeLinkResult.hidden = true;
+      try {
+        const csrfToken = document.querySelector(
+          '#clientProfileForm input[name="csrfmiddlewaretoken"]',
+        ).value;
+        const body = new URLSearchParams({
+          filing_type: document.getElementById("intakeFilingType").value,
+          client_name_hint: document.getElementById("intakeClientHint").value.trim(),
+        });
+        const response = await fetch("{% url 'generate_intake_link' %}", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "X-CSRFToken": csrfToken,
+            Accept: "application/json",
+          },
+          body,
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || `Link generation failed with HTTP ${response.status}.`);
+        }
+
+        generatedIntakeUrl.value = data.url;
+        const whatsappUrl = new URL("https://api.whatsapp.com/send");
+        whatsappUrl.searchParams.set(
+          "text",
+          `Please securely complete your ProCAC client intake: ${data.url}`,
+        );
+        document.getElementById("shareIntakeLinkWhatsApp").href = whatsappUrl.toString();
+        intakeLinkResult.hidden = false;
+        addPendingIntakeRow(data);
+      } catch (error) {
+        intakeLinkError.classList.remove("success");
+        intakeLinkError.textContent = error.message || "Could not generate the intake link.";
+        intakeLinkError.hidden = false;
+      } finally {
+        generateIntakeLinkButton.disabled = false;
+      }
+    });
+
+    document.getElementById("copyIntakeLinkButton").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(generatedIntakeUrl.value);
+        intakeLinkError.classList.add("success");
+        intakeLinkError.textContent = "Intake link copied.";
+        intakeLinkError.hidden = false;
+      } catch (error) {
+        intakeLinkError.classList.remove("success");
+        intakeLinkError.textContent = "Copy failed. Select and copy the link manually.";
+        intakeLinkError.hidden = false;
+        console.error("Could not copy the client intake link.", error);
+      }
+    });
+
+    refreshIntakeLinkStatuses();
+    window.setInterval(refreshIntakeLinkStatuses, 15000);
+
+    document.getElementById("filterType").addEventListener("change", filterClients);
+    document.getElementById("clientSearch").addEventListener("input", filterClients);
+    document.getElementById("clientSearch").addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.currentTarget.value = "";
+        filterClients();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        document.getElementById("clientSearch").focus();
+      }
+    });
+
+    const newClientModal = document.getElementById("newClientModal");
+    if (newClientModal.dataset.showOnLoad === "true") {
+      bootstrap.Modal.getOrCreateInstance(newClientModal).show();
+    }
+  </script>
+</body>
+</html>

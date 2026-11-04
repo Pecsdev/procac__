@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Secure client intake | ProCAC</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px 16px; background: #f5f7fa; color: #17191f; font: 15px/1.5 Inter, system-ui, sans-serif; }
+    main { width: min(680px, 100%); margin: 0 auto; padding: 28px; border: 1px solid #e1e5eb; border-radius: 8px; background: #fff; box-shadow: 0 8px 28px rgba(15, 23, 42, .06); }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    p { color: #596273; }
+    .field { margin: 16px 0; }
+    label { display: block; margin-bottom: 5px; color: #000; font-size: 13px; font-weight: 600; }
+    input, select, textarea { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid #cfd5df; border-radius: 5px; color: #17191f; background: #fff; font: inherit; }
+    textarea { min-height: 84px; resize: vertical; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+    .button { min-height: 42px; padding: 9px 16px; border: 0; border-radius: 5px; color: #fff; background: #2563eb; font: inherit; font-weight: 600; cursor: pointer; }
+    .error { margin: 5px 0 0; color: #b42318; font-size: 12px; }
+    .notice { padding: 16px; border-radius: 5px; background: #f2f6ff; }
+    .notice.success { background: #f0faf4; }
+    .expiry-warning { margin: 0 0 18px; padding: 12px 14px; border: 1px solid #dc2626; color: #b91c1c; background: #fef2f2; font-size: 16px; font-weight: 800; }
+    @media (max-width: 520px) { body { padding: 16px 10px; } main { padding: 20px 16px; } .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    {% if state == 'success' %}
+      <div class="notice success" role="status">
+        <h1>Details securely transmitted</h1>
+        <p>Details securely transmitted to your legal counsel. You may now close this page.</p>
+      </div>
+    {% elif state == 'expired' %}
+      <div class="notice" role="alert">
+        <h1>Link expired</h1>
+        <p>This client intake link has expired. Please contact your legal counsel for a new link.</p>
+      </div>
+    {% elif state == 'invalid' %}
+      <div class="notice" role="alert">
+        <h1>Link already used or invalid</h1>
+        <p>This client intake link is invalid or has already been submitted. Please contact your legal counsel if you need assistance.</p>
+      </div>
+    {% else %}
+      <div class="expiry-warning" role="alert">This form expires in 10hrs</div>
+      <h1>Secure client intake</h1>
+      <p>Provide your details for your legal counsel. This private link can only be used once and expires after 10 hours.</p>
+      <p>Location options use a standard public Nigerian State/LGA dataset and have not been verified against CAC CRP. Confirm selections on the portal before filing.</p>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.entity_name }}
+        {{ form.entity_type }}
+        {{ form.directors_json }}
+        {% if form.non_field_errors %}<div class="error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="field">
+          <label for="id_proposed_name_1">Proposed business / organization name</label>
+          {{ form.proposed_name_1 }}
+          {% for error in form.proposed_name_1.errors %}<div class="error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+          <label for="id_proposed_name_2">Alternative proposed name</label>
+          {{ form.proposed_name_2 }}
+          {% for error in form.proposed_name_2.errors %}<div class="error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label for="id_email">Contact email</label>
+            {{ form.email }}
+            {% for error in form.email.errors %}<div class="error">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="field">
+            <label for="id_phone">Contact phone</label>
+            {{ form.phone }}
+            {% for error in form.phone.errors %}<div class="error">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+        <h2>Primary proprietor / director / trustee</h2>
+        <div class="field">
+          <label for="proprietorName">Full name</label>
+          <input id="proprietorName" name="proprietor_name" maxlength="255" value="{{ stakeholder_data.full_name|default:'' }}" required>
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label for="proprietorDob">Date of birth</label>
+            <input id="proprietorDob" type="date" name="proprietor_dob" value="{{ stakeholder_data.dob|default:'' }}">
+          </div>
+          <div class="field">
+            <label for="proprietorGender">Gender</label>
+            <select id="proprietorGender" name="proprietor_gender">
+              <option value="">Select</option>
+              <option value="Male" {% if stakeholder_data.gender == 'Male' %}selected{% endif %}>Male</option>
+              <option value="Female" {% if stakeholder_data.gender == 'Female' %}selected{% endif %}>Female</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="proprietorNationality">Nationality</label>
+            <input id="proprietorNationality" name="proprietor_nationality" maxlength="100" value="{{ stakeholder_data.nationality|default:'' }}">
+          </div>
+          <div class="field">
+            <label for="identityType">Identity type</label>
+            <select id="identityType" name="identity_type">
+              <option value="">Select</option>
+              <option value="NIN" {% if stakeholder_data.identity_type == 'NIN' %}selected{% endif %}>NIN</option>
+              <option value="Passport" {% if stakeholder_data.identity_type == 'Passport' %}selected{% endif %}>Passport</option>
+              <option value="Other" {% if stakeholder_data.identity_type == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="identityNumber">Identity number</label>
+          <input id="identityNumber" name="identity_number" maxlength="100" value="{{ stakeholder_data.identity_number|default:'' }}">
+        </div>
+        <div class="field">
+          <label for="id_nin">Primary NIN (optional)</label>
+          {{ form.nin }}
+          {% for error in form.nin.errors %}<div class="error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+          <label for="proprietorAddress">Residential address</label>
+          <textarea id="proprietorAddress" name="proprietor_address" maxlength="255">{{ stakeholder_data.residential_address|default:'' }}</textarea>
+        </div>
+        <h2>Registration details</h2>
+        <div class="field">
+          <label for="id_principal_activity">Principal Business Activity</label>
+          {{ form.principal_activity }}
+          {% for error in form.principal_activity.errors %}<div class="error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+          <label for="id_specific_activity">Specific Business Activity</label>
+          {{ form.specific_activity }}
+          {% for error in form.specific_activity.errors %}<div class="error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+          <label for="id_objectives">Objectives / description</label>
+          {{ form.objectives }}
+        </div>
+        <div class="field">
+          <label for="id_street_address">Street address</label>
+          {{ form.street_address }}
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label for="id_city">City</label>
+            {{ form.city }}
+          </div>
+          <div class="field">
+            <label for="id_lga">LGA</label>
+            {{ form.lga }}
+            {% for error in form.lga.errors %}<div class="error">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="field">
+            <label for="id_state">State</label>
+            {{ form.state }}
+            {% for error in form.state.errors %}<div class="error">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="field">
+            <label for="id_commencement_date">Commencement date</label>
+            {{ form.commencement_date }}
+          </div>
+        </div>
+        <button class="button" type="submit">Securely submit details</button>
+      </form>
+    {% endif %}
+  </main>
+  {% if state == 'form' %}
+    {{ state_lga_data|json_script:"state-lga-data" }}
+    {{ business_activity_data|json_script:"business-activity-data" }}
+    <script>
+      (() => {
+        const stateLgaData = JSON.parse(
+          document.getElementById("state-lga-data").textContent,
+        );
+        const activityData = JSON.parse(
+          document.getElementById("business-activity-data").textContent,
+        );
+        const stateSelect = document.getElementById("id_state");
+        const lgaSelect = document.getElementById("id_lga");
+        const principalSelect = document.getElementById("id_principal_activity");
+        const specificSelect = document.getElementById("id_specific_activity");
+
+        const updateOptions = (select, values, placeholder, selectedValue = "") => {
+          select.replaceChildren(new Option(placeholder, ""));
+          values.forEach((value) => select.add(new Option(value, value)));
+          select.value = values.includes(selectedValue) ? selectedValue : "";
+        };
+
+        const updateLgas = (selectedLga = "") => {
+          updateOptions(
+            lgaSelect,
+            stateLgaData[stateSelect.value] || [],
+            "Select an LGA",
+            selectedLga,
+          );
+        };
+        const updateSpecificActivities = (selectedActivity = "") => {
+          updateOptions(
+            specificSelect,
+            activityData[principalSelect.value] || [],
+            "Select a specific business activity",
+            selectedActivity,
+          );
+          specificSelect.disabled = !principalSelect.value;
+        };
+
+        const initialLga = lgaSelect.value;
+        const initialSpecificActivity = specificSelect.value;
+        updateLgas(initialLga);
+        updateSpecificActivities(initialSpecificActivity);
+        stateSelect.addEventListener("change", () => updateLgas());
+        principalSelect.addEventListener("change", () => updateSpecificActivities());
+      })();
+    </script>
+  {% endif %}
+</body>
+</html>

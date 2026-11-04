@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consultant audit | ProCAC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0b0f14; color: #f8fafc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0b0f14; color: #f8fafc; font-size: 13px; }
+    button, input, select { font: inherit; }
+    .shell { width: min(1440px, 100%); margin: 0 auto; padding: 28px 32px 48px; }
+    .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+    .eyebrow { color: #94a3b8; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 5px 0; font-size: 22px; letter-spacing: -.04em; }
+    h2 { margin: 0; font-size: 13px; font-weight: 600; }
+    p { margin: 4px 0 0; color: #94a3b8; font-size: 11px; }
+    .panel, .summary { border: 1px solid #e2e8f0; background: #10161f; }
+    .summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 16px; }
+    .summary > div { padding: 13px; border-right: 1px solid #e2e8f0; }
+    .summary > div:last-child { border-right: 0; }
+    .summary-label { color: #94a3b8; font-size: 10px; }
+    .summary-value { margin-top: 6px; font-size: 15px; font-weight: 600; }
+    .panel { margin-bottom: 16px; }
+    .panel-head { padding: 13px 15px; border-bottom: 1px solid #e2e8f0; }
+    .panel-body { padding: 15px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 9px 11px; border-bottom: 1px solid #e2e8f0; color: #94a3b8; font-size: 9px; text-transform: uppercase; }
+    td { padding: 10px 11px; border-bottom: 1px solid #334155; color: #dbe3ee; font-size: 11px; vertical-align: top; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .muted { color: #94a3b8; }
+    .status { display: inline-block; padding: 3px 6px; border: 1px solid #64748b; font-size: 9px; }
+    .status.success, .status.active { border-color: #16835d; color: #86efac; }
+    .status.failure, .status.expired, .status.inactive { border-color: #b91c1c; color: #fca5a5; }
+    .status.used { color: #cbd5e1; }
+    .form-row { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+    label { display: block; margin-bottom: 5px; color: #cbd5e1; font-size: 10px; }
+    select, input[type=number] { min-height: 34px; padding: 0 9px; border: 1px solid #64748b; border-radius: 0; color: #f8fafc; background: #0b0f14; }
+    .button, .link { display: inline-block; min-height: 32px; padding: 7px 10px; border: 1px solid #64748b; border-radius: 0; color: #e2e8f0; background: transparent; font-size: 10px; text-decoration: none; cursor: pointer; }
+    .button:hover, .link:hover { border-color: #f8fafc; background: #1e293b; }
+    .button.danger { border-color: #b91c1c; color: #fca5a5; }
+    .message { margin-bottom: 12px; padding: 10px; border: 1px solid #64748b; color: #dbe3ee; }
+    .pager { display: flex; justify-content: space-between; padding: 10px 12px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 10px; }
+    @media (max-width: 700px) { .shell { padding: 18px 12px; } .summary { grid-template-columns: repeat(2, 1fr); } .summary > div:nth-child(2) { border-right: 0; } .summary > div:nth-child(-n+2) { border-bottom: 1px solid #e2e8f0; } .topbar { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow"><a class="link" href="{% url 'super_admin:dashboard' %}">← Admin analytics</a></div>
+        <h1>{{ consultant.email|default:consultant.username }}</h1>
+        <p>{{ profile.firm_name|default:"No agency name" }} · Joined {{ consultant.date_joined|date:"M j, Y" }} · {{ plan }}</p>
+      </div>
+      <form method="post" action="{% url 'super_admin:consultant_status' consultant.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="active" value="{% if consultant.is_active %}false{% else %}true{% endif %}">
+        <input type="hidden" name="next" value="detail">
+        <button class="button {% if consultant.is_active %}danger{% endif %}" type="submit">{% if consultant.is_active %}Deactivate account{% else %}Activate account{% endif %}</button>
+      </form>
+    </header>
+
+    {% for message in messages %}<div class="message">{{ message }}</div>{% endfor %}
+
+    <section class="summary" aria-label="Consultant summary">
+      <div><div class="summary-label">Account status</div><div class="summary-value">{% if consultant.is_active %}Active{% else %}Deactivated{% endif %}</div></div>
+      <div><div class="summary-label">Client profiles</div><div class="summary-value">{{ client_page.paginator.count }}</div></div>
+      <div><div class="summary-label">Quota used</div><div class="summary-value">{{ quota_used }} / {% if quota_limit is None %}Unlimited{% else %}{{ quota_limit }}{% endif %}</div></div>
+      <div><div class="summary-label">Intake links</div><div class="summary-value">{{ link_page.paginator.count }}</div></div>
+    </section>
+
+    <section class="panel" id="quota">
+      <div class="panel-head"><h2>Quota override</h2></div>
+      <div class="panel-body">
+        {% if profile %}
+          <p>Set a custom cap, use the active plan limit, or grant unlimited profiles with a NULL override.</p>
+          <form method="post" action="{% url 'super_admin:consultant_quota' consultant.pk %}" class="form-row">
+            {% csrf_token %}
+            <div>
+              <label for="quotaMode">Quota setting</label>
+              <select id="quotaMode" name="quota_mode">
+                <option value="plan" {% if not profile.has_profile_limit_override %}selected{% endif %}>Use plan limit ({{ plan }})</option>
+                <option value="custom" {% if profile.has_profile_limit_override and profile.profile_limit_override is not None %}selected{% endif %}>Custom cap</option>
+                <option value="unlimited" {% if profile.has_profile_limit_override and profile.profile_limit_override is None %}selected{% endif %}>Unlimited (NULL)</option>
+              </select>
+            </div>
+            <div>
+              <label for="profileLimit">Custom profile cap</label>
+              <input id="profileLimit" type="number" name="profile_limit" min="0" step="1" value="{{ profile.profile_limit_override|default_if_none:'' }}" placeholder="e.g. 50">
+            </div>
+            <button type="submit" class="button">Save quota</button>
+          </form>
+        {% else %}
+          <p>This user does not have a consultant profile, so a custom quota cannot be set.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Client filings</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Entity</th><th>Type</th><th>Status</th><th>NIN</th><th>Location</th><th>Created</th></tr></thead>
+          <tbody>
+            {% for client in client_page %}
+              <tr>
+                <td>{{ client.entity_name }}<span class="muted"><br>{{ client.email }}</span></td>
+                <td>{{ client.get_entity_type_display }}</td>
+                <td>{{ client.get_status_display }}</td>
+                <td>{{ client.nin|default:"—" }}</td>
+                <td>{{ client.state|default:"—" }} / {{ client.lga|default:"—" }}</td>
+                <td>{{ client.created_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}<tr><td colspan="6" class="muted">No client filings.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span>{{ client_page.start_index|default:0 }}–{{ client_page.end_index|default:0 }} of {{ client_page.paginator.count }}</span>
+        <span>
+          {% if client_page.has_previous %}<a class="link" href="?clients_page={{ client_page.previous_page_number }}&amp;links_page={{ link_page.number }}">Previous</a>{% endif %}
+          {% if client_page.has_next %}<a class="link" href="?clients_page={{ client_page.next_page_number }}&amp;links_page={{ link_page.number }}">Next</a>{% endif %}
+        </span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Client intake links</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Reference</th><th>Filing type</th><th>Status</th><th>Created</th><th>Expires</th></tr></thead>
+          <tbody>
+            {% for item in link_rows %}
+              <tr>
+                <td>{{ item.link.client_name_hint|default:"—" }}</td>
+                <td>{{ item.link.get_filing_type_display }}</td>
+                <td><span class="status {{ item.status|lower }}">{{ item.status }}</span></td>
+                <td>{{ item.link.created_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ item.link.expires_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}<tr><td colspan="5" class="muted">No intake links.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span>{{ link_page.start_index|default:0 }}–{{ link_page.end_index|default:0 }} of {{ link_page.paginator.count }}</span>
+        <span>
+          {% if link_page.has_previous %}<a class="link" href="?links_page={{ link_page.previous_page_number }}&amp;clients_page={{ client_page.number }}">Previous</a>{% endif %}
+          {% if link_page.has_next %}<a class="link" href="?links_page={{ link_page.next_page_number }}&amp;clients_page={{ client_page.number }}">Next</a>{% endif %}
+        </span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>DOM injection audit · latest 50</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Timestamp</th><th>Client profile</th><th>Execution status</th><th>DOM fields populated</th></tr></thead>
+          <tbody>
+            {% for log in audit_logs %}
+              <tr>
+                <td>{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                <td>{{ log.client_profile.entity_name|default:"Client removed" }}</td>
+                <td><span class="status {{ log.status }}">{{ log.get_status_display }}</span></td>
+                <td>{{ log.fields_populated }}</td>
+              </tr>
+            {% empty %}<tr><td colspan="4" class="muted">No extension injection attempts recorded.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,107 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 320px;
+  margin: 0;
+  color: #233541;
+  background: #f4f6f2;
+  font: 14px/1.45 Arial, sans-serif;
+}
+
+main {
+  padding: 18px;
+}
+
+header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #dce5e0;
+}
+
+h1 {
+  margin: 0;
+  color: #15344b;
+  font-size: 20px;
+}
+
+header p,
+#account-status {
+  margin: 4px 0 0;
+}
+
+label {
+  display: block;
+  margin: 16px 0 6px;
+  font-weight: 600;
+}
+
+select,
+input,
+button {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 6px;
+  font: inherit;
+}
+
+select,
+input {
+  padding: 7px 9px;
+  border: 1px solid #b9c9c4;
+  min-width: 0;
+  background: #fff;
+}
+
+.key-row {
+  display: flex;
+  gap: 6px;
+}
+
+.key-row input {
+  flex: 1;
+}
+
+.key-row button {
+  width: auto;
+  margin-top: 0;
+  padding: 0 9px;
+  white-space: nowrap;
+}
+
+select {
+  width: 100%;
+}
+
+button {
+  margin-top: 12px;
+  border: 0;
+  color: #fff;
+  background: #1f5c78;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.secondary {
+  color: #15344b;
+  background: #dce5e0;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.muted {
+  color: #64757c;
+}
+
+#message {
+  min-height: 1.4em;
+  margin-bottom: 0;
+}

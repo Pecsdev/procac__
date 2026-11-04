@@ -1,0 +1,1893 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include "frontend/favicon.html" %}
+  <title>ProCAC | Automated CAC filing for consultants</title>
+  <meta name="description" content="Automate Business Name, Limited Company, and Incorporated Trustee filings with ProCAC, built for accredited CAC consultants and legal practitioners in Nigeria.">
+  <meta name="theme-color" content="#0a0f1d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="{% static 'frontend/assets/js/encoded-links.js' %}" defer></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #0a0f1d;
+      --surface: #0e1627;
+      --surface-raised: #121d31;
+      --surface-soft: #101a2c;
+      --line: rgba(255, 255, 255, .08);
+      --line-strong: rgba(255, 255, 255, .13);
+      --ink: #edf3ff;
+      --muted: #9aa8bf;
+      --faint: #71819b;
+      --blue: #3b82f6;
+      --blue-deep: #2563eb;
+      --emerald: #34d399;
+      --content: 1160px;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 6rem;
+    }
+
+    body.home-page {
+      min-width: 320px;
+      margin: 0;
+      background: var(--page) !important;
+      color: var(--ink) !important;
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+      letter-spacing: -.01em;
+    }
+
+    body, button, a { -webkit-tap-highlight-color: transparent; }
+    a { color: inherit; }
+    button, summary { font: inherit; }
+    button { color: inherit; }
+    img { display: block; max-width: 100%; }
+    [hidden] { display: none !important; }
+
+    .wrap {
+      width: min(var(--content), calc(100% - 3rem));
+      margin-inline: auto;
+    }
+
+    .section {
+      position: relative;
+      padding-block: clamp(5rem, 9vw, 7.5rem);
+    }
+
+    .section-soft {
+      border-block: 1px solid rgba(255, 255, 255, .035);
+      background:
+        radial-gradient(ellipse at 50% 0, rgba(37, 99, 235, .07), transparent 55%),
+        #0c1322;
+    }
+
+    .site-header {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .07);
+      background: rgba(10, 15, 29, .78) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .home-page nav.site-header {
+      background: rgba(10, 15, 29, .78) !important;
+    }
+
+    .header-inner {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .brand-logo-crop {
+      position: relative;
+      display: block;
+      width: 174px;
+      height: 48px;
+      overflow: hidden;
+    }
+
+    .brand-logo-crop img {
+      position: absolute;
+      top: -91px;
+      left: -30px;
+      width: 235px;
+      max-width: none;
+      height: 235px;
+      filter: brightness(0) invert(1);
+    }
+
+    .desktop-nav {
+      display: flex;
+      align-items: center;
+      gap: clamp(.9rem, 2vw, 1.7rem);
+    }
+
+    .desktop-nav > a,
+    .nav-dropdown > summary {
+      color: #b6c2d5;
+      font-size: .86rem;
+      font-weight: 550;
+      text-decoration: none;
+      transition: color .18s ease;
+    }
+
+    .desktop-nav > a:hover,
+    .desktop-nav > a:focus-visible,
+    .nav-dropdown > summary:hover { color: #fff; }
+
+    .nav-dropdown { position: relative; }
+
+    .nav-dropdown > summary {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .nav-dropdown > summary::-webkit-details-marker,
+    .mobile-menu > summary::-webkit-details-marker { display: none; }
+
+    .nav-dropdown > summary::after {
+      width: .42rem;
+      height: .42rem;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      content: "";
+      transform: translateY(-2px) rotate(45deg);
+      transition: transform .18s ease;
+    }
+
+    .nav-dropdown[open] > summary::after { transform: translateY(1px) rotate(225deg); }
+
+    .dropdown-panel {
+      position: absolute;
+      top: calc(100% + 1rem);
+      right: 0;
+      display: grid;
+      width: 245px;
+      gap: .25rem;
+      padding: .5rem;
+      border: 1px solid var(--line-strong);
+      border-radius: 14px;
+      background: #111a2b;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, .4);
+    }
+
+    .dropdown-panel a {
+      padding: .7rem .75rem;
+      border-radius: 9px;
+      color: #c5d0e1;
+      font-size: .84rem;
+      text-decoration: none;
+    }
+
+    .dropdown-panel a:hover,
+    .dropdown-panel a:focus-visible {
+      color: #fff;
+      background: rgba(59, 130, 246, .12);
+    }
+
+    .dropdown-panel small {
+      display: block;
+      padding: .35rem .75rem .15rem;
+      color: var(--faint);
+      font-size: .67rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .mobile-menu { display: none; }
+
+    .button {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      padding: .72rem 1.15rem;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      font-size: .86rem;
+      font-weight: 650;
+      line-height: 1.2;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease, color .18s ease;
+    }
+
+    .button:hover { transform: translateY(-2px); }
+
+    .button:focus-visible,
+    .desktop-nav a:focus-visible,
+    summary:focus-visible,
+    .site-footer a:focus-visible {
+      outline: 3px solid rgba(96, 165, 250, .55);
+      outline-offset: 3px;
+    }
+
+    .button-primary {
+      color: #fff;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 8px 26px rgba(37, 99, 235, .22);
+    }
+
+    .button-primary:hover {
+      color: #fff;
+      box-shadow: 0 12px 32px rgba(37, 99, 235, .38);
+    }
+
+    .button-quiet {
+      border-color: var(--line-strong);
+      color: #e2eaf7;
+      background: rgba(255, 255, 255, .025);
+    }
+
+    .button-quiet:hover {
+      border-color: rgba(96, 165, 250, .45);
+      color: #fff;
+      background: rgba(59, 130, 246, .08);
+    }
+
+    .button-large { min-height: 54px; padding-inline: 1.4rem; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding-block: clamp(5.5rem, 10vw, 8rem) clamp(5rem, 9vw, 7rem);
+      background:
+        radial-gradient(ellipse at 78% 34%, rgba(37, 99, 235, .17), transparent 35%),
+        radial-gradient(ellipse at 12% 0, rgba(37, 99, 235, .1), transparent 38%),
+        linear-gradient(180deg, #0b1120 0%, var(--page) 100%);
+    }
+
+    .hero::after {
+      position: absolute;
+      z-index: 0;
+      top: -25rem;
+      right: -14rem;
+      width: 58rem;
+      height: 58rem;
+      border: 1px solid rgba(96, 165, 250, .08);
+      border-radius: 50%;
+      box-shadow: 0 0 0 55px rgba(96, 165, 250, .018), 0 0 0 110px rgba(96, 165, 250, .014);
+      content: "";
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(310px, .75fr);
+      align-items: center;
+      gap: clamp(3rem, 7vw, 6.5rem);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      margin-bottom: 1.35rem;
+      color: #8eb9ff;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 12px rgba(52, 211, 153, .7);
+    }
+
+    h1, h2, h3, h4, p { margin-top: 0; }
+
+    .hero h1 {
+      max-width: 760px;
+      margin-bottom: 1.35rem;
+      color: #f4f7ff;
+      font-size: clamp(2.8rem, 6.4vw, 5.3rem);
+      font-weight: 750;
+      letter-spacing: -.065em;
+      line-height: 1.03;
+    }
+
+    .hero h1 span {
+      color: #6ea5ff;
+      background: linear-gradient(100deg, #8dbaff, #4a86f6 78%);
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-copy {
+      max-width: 625px;
+      margin-bottom: 1.9rem;
+      color: #a9b5ca;
+      font-size: clamp(1rem, 1.6vw, 1.12rem);
+      line-height: 1.8;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .8rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem 1.4rem;
+      color: #9baac0;
+      font-size: .78rem;
+    }
+
+    .trust-row span { display: inline-flex; align-items: center; gap: .45rem; }
+    .trust-row i { color: var(--emerald); font-size: .72rem; }
+
+    .hero-art {
+      position: relative;
+      display: grid;
+      min-height: 390px;
+      place-items: center;
+    }
+
+    .orbit {
+      position: absolute;
+      width: min(100%, 410px);
+      aspect-ratio: 1;
+      border: 1px solid rgba(115, 160, 237, .12);
+      border-radius: 50%;
+      box-shadow: inset 0 0 60px rgba(37, 99, 235, .04), 0 0 60px rgba(37, 99, 235, .04);
+    }
+
+    .orbit::before,
+    .orbit::after {
+      position: absolute;
+      inset: 12%;
+      border: 1px solid rgba(115, 160, 237, .1);
+      border-radius: inherit;
+      content: "";
+    }
+
+    .orbit::after { inset: 25%; }
+
+    .hero-card {
+      position: relative;
+      width: min(100%, 335px);
+      padding: 1.25rem;
+      border: 1px solid var(--line-strong);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(20, 33, 56, .94), rgba(13, 22, 38, .94));
+      box-shadow: 0 30px 90px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .035);
+      transform: rotate(-2deg);
+      animation: card-float 6s ease-in-out infinite;
+    }
+
+    @keyframes card-float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-10px) rotate(-1deg); }
+    }
+
+    .hero-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+      color: #d9e4f6;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+
+    .status-pill,
+    .filing-status {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .34rem .58rem;
+      border: 1px solid rgba(52, 211, 153, .18);
+      border-radius: 99px;
+      color: #72e0b6;
+      background: rgba(16, 185, 129, .1);
+      font-size: .64rem;
+      font-weight: 650;
+    }
+
+    .status-pill::before,
+    .filing-status::before {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald);
+      content: "";
+      box-shadow: 0 0 9px rgba(52, 211, 153, .55);
+    }
+
+    .hero-card-body { padding-block: 1.2rem .25rem; }
+
+    .hero-card-label {
+      margin-bottom: .45rem;
+      color: #8594ab;
+      font-size: .66rem;
+      font-weight: 650;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .hero-company {
+      margin-bottom: 1.1rem;
+      color: #f1f5ff;
+      font-size: 1.2rem;
+      font-weight: 650;
+      letter-spacing: -.03em;
+    }
+
+    .hero-card-row {
+      display: flex;
+      justify-content: space-between;
+      padding-block: .72rem;
+      border-top: 1px solid rgba(255, 255, 255, .055);
+      color: #8998ae;
+      font-size: .73rem;
+    }
+
+    .hero-card-row strong { color: #d6e0f0; font-weight: 550; }
+
+    .section-heading {
+      max-width: 690px;
+      margin: 0 auto clamp(2.5rem, 5vw, 3.8rem);
+      text-align: center;
+    }
+
+    .section-kicker {
+      display: block;
+      margin-bottom: .75rem;
+      color: #7eacff;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .section-heading h2 {
+      margin-bottom: .85rem;
+      color: #f1f5ff;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -.055em;
+      line-height: 1.15;
+    }
+
+    .section-heading p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: .96rem;
+    }
+
+    .simulator {
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #0c1321;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .24);
+    }
+
+    .sim-window-bar {
+      display: flex;
+      min-height: 52px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .7rem 1.15rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .018);
+    }
+
+    .window-controls { display: flex; gap: 6px; }
+    .window-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .window-dot-red { background: #fb7185; }
+    .window-dot-yellow { background: #fbbf24; }
+    .window-dot-green { background: #34d399; }
+
+    .window-title {
+      color: #8d9bb2;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .72rem;
+    }
+
+    .sim-body {
+      display: grid;
+      grid-template-columns: minmax(240px, .72fr) minmax(0, 1.28fr);
+    }
+
+    .sim-picker {
+      padding: clamp(1.2rem, 3vw, 1.8rem);
+      border-right: 1px solid var(--line);
+    }
+
+    .sim-picker h3,
+    .sim-target h3 {
+      margin-bottom: 1rem;
+      color: #e5ecf8;
+      font-size: .93rem;
+      font-weight: 650;
+      letter-spacing: -.02em;
+    }
+
+    .client-option {
+      display: flex;
+      align-items: flex-start;
+      gap: .7rem;
+      margin-bottom: .7rem;
+      padding: .85rem;
+      border: 1px solid rgba(255, 255, 255, .075);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .018);
+      cursor: pointer;
+      transition: border-color .18s ease, background .18s ease;
+    }
+
+    .client-option:hover,
+    .client-option:has(input:checked) {
+      border-color: rgba(59, 130, 246, .5);
+      background: rgba(37, 99, 235, .09);
+    }
+
+    .client-option input {
+      width: 15px;
+      height: 15px;
+      flex: 0 0 auto;
+      margin: .17rem 0 0;
+      accent-color: var(--blue);
+    }
+
+    .client-option strong {
+      display: block;
+      margin-bottom: .15rem;
+      color: #e6edf9;
+      font-size: .78rem;
+      font-weight: 620;
+    }
+
+    .client-option small { color: #8492a8; font-size: .68rem; }
+
+    .sim-run {
+      width: 100%;
+      margin-top: .35rem;
+      font-size: .8rem;
+    }
+
+    .sim-target { min-width: 0; padding: clamp(1.2rem, 3vw, 1.8rem); }
+
+    .sim-target-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .sim-target h3 { margin-bottom: 0; }
+
+    .filing-status {
+      flex: 0 0 auto;
+      color: #a5b1c5;
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, .035);
+    }
+
+    .filing-status.is-running {
+      border-color: rgba(251, 191, 36, .2);
+      color: #fcd779;
+      background: rgba(245, 158, 11, .08);
+    }
+
+    .filing-status.is-running::before {
+      background: #fbbf24;
+      box-shadow: 0 0 9px rgba(251, 191, 36, .6);
+    }
+
+    .filing-status.is-complete {
+      border-color: rgba(52, 211, 153, .2);
+      color: #72e0b6;
+      background: rgba(16, 185, 129, .1);
+    }
+
+    .form-preview {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .9rem;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(5, 10, 19, .45);
+    }
+
+    .preview-field { min-width: 0; }
+    .preview-field-wide { grid-column: 1 / -1; }
+
+    .preview-field label {
+      display: block;
+      margin-bottom: .4rem;
+      color: #8492a8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .65rem;
+    }
+
+    .preview-field input,
+    .preview-field textarea {
+      width: 100%;
+      min-height: 39px;
+      padding: .6rem .7rem;
+      border: 1px solid rgba(255, 255, 255, .075);
+      border-radius: 8px;
+      outline: 0;
+      color: #dbe8ff;
+      background: rgba(255, 255, 255, .035);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .72rem;
+      resize: vertical;
+    }
+
+    .preview-field input::placeholder,
+    .preview-field textarea::placeholder { color: #53627a; }
+
+    .console {
+      min-height: 70px;
+      margin-top: .85rem;
+      padding: .8rem .9rem;
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 10px;
+      color: #8eddb7;
+      background: #080e19;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .7rem;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .console-label { color: #64748b; }
+    .console-cursor {
+      display: inline-block;
+      width: 6px;
+      height: 12px;
+      margin-left: 3px;
+      vertical-align: -2px;
+      background: #60a5fa;
+      animation: blink .9s steps(2, start) infinite;
+    }
+
+    @keyframes blink { to { visibility: hidden; } }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 1rem;
+    }
+
+    .feature-card {
+      position: relative;
+      isolation: isolate;
+      min-height: 275px;
+      padding: clamp(1.4rem, 3vw, 2rem);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(19, 29, 48, .82), rgba(12, 19, 33, .92));
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+
+    .feature-card:nth-child(2) { transform: translateY(20px); }
+
+    .feature-card::before {
+      position: absolute;
+      z-index: -1;
+      inset: -1px;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(59, 130, 246, .45), transparent 44%, rgba(52, 211, 153, .14));
+      content: "";
+      opacity: 0;
+      transition: opacity .22s ease;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(96, 165, 250, .32);
+      box-shadow: 0 20px 55px rgba(0, 0, 0, .2);
+      transform: translateY(-5px);
+    }
+
+    .feature-card:nth-child(2):hover { transform: translateY(15px); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      margin-bottom: 1.3rem;
+      place-items: center;
+      border: 1px solid rgba(96, 165, 250, .2);
+      border-radius: 13px;
+      color: #83b4ff;
+      background: rgba(37, 99, 235, .12);
+      font-size: 1.05rem;
+    }
+
+    .feature-card h3 {
+      margin-bottom: .65rem;
+      color: #edf3ff;
+      font-size: 1.12rem;
+      font-weight: 650;
+      letter-spacing: -.03em;
+    }
+
+    .feature-card p {
+      margin-bottom: 1.1rem;
+      color: #9aa8bf;
+      font-size: .84rem;
+    }
+
+    .feature-list,
+    .plan-features {
+      display: grid;
+      gap: .58rem;
+      margin: 0;
+      padding: 0;
+      color: #b0bdd1;
+      font-size: .77rem;
+      list-style: none;
+    }
+
+    .feature-list li,
+    .plan-features li { display: flex; align-items: flex-start; gap: .55rem; }
+
+    .feature-list i,
+    .plan-features i {
+      margin-top: .27rem;
+      color: var(--emerald);
+      font-size: .68rem;
+    }
+
+    .extension-section {
+      overflow: hidden;
+      border-block: 1px solid rgba(255, 255, 255, .04);
+      background:
+        radial-gradient(ellipse at 78% 50%, rgba(37, 99, 235, .12), transparent 42%),
+        #0c1322;
+    }
+
+    .extension-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, .8fr);
+      align-items: center;
+      gap: clamp(3rem, 8vw, 7rem);
+    }
+
+    .extension-copy h2 {
+      max-width: 580px;
+      margin-bottom: 1rem;
+      color: #f1f5ff;
+      font-size: clamp(2rem, 4vw, 3.3rem);
+      font-weight: 700;
+      letter-spacing: -.055em;
+      line-height: 1.12;
+    }
+
+    .extension-copy > p {
+      max-width: 540px;
+      margin-bottom: 1.7rem;
+      color: var(--muted);
+    }
+
+    .steps { display: grid; gap: 1.15rem; }
+
+    .step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: .9rem;
+      align-items: start;
+    }
+
+    .step-number {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border: 1px solid rgba(96, 165, 250, .25);
+      border-radius: 50%;
+      color: #9cc4ff;
+      background: rgba(37, 99, 235, .13);
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    .step h3 {
+      margin-bottom: .15rem;
+      color: #e6edf9;
+      font-size: .88rem;
+      font-weight: 620;
+    }
+
+    .step p { margin: 0; color: #8796ad; font-size: .78rem; }
+
+    .bookmark-card {
+      padding: clamp(1.5rem, 3vw, 2rem);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(19, 29, 48, .9), rgba(12, 19, 33, .96));
+      box-shadow: 0 22px 65px rgba(0, 0, 0, .25);
+      text-align: center;
+    }
+
+    .bookmark-card h3 {
+      margin-bottom: .5rem;
+      color: #edf3ff;
+      font-size: 1.02rem;
+      font-weight: 650;
+    }
+
+    .bookmark-card > p { margin-bottom: 1.3rem; color: #95a3ba; font-size: .82rem; }
+
+    .bookmarklet-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      padding: .78rem 1.2rem;
+      border: 1px dashed rgba(125, 174, 255, .58);
+      border-radius: 11px;
+      color: #fff !important;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, .24);
+      font-size: .84rem;
+      font-weight: 650;
+      text-decoration: none;
+      cursor: grab;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .bookmarklet-btn:hover {
+      background: linear-gradient(135deg, #4b8ff8, #2d6fec);
+      box-shadow: 0 12px 32px rgba(37, 99, 235, .37);
+      transform: translateY(-2px);
+    }
+
+    .code-sample {
+      margin-top: .6rem;
+      padding: .95rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: #c6d4e8;
+      background: #080e19;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .7rem;
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+
+    .code-sample span { color: #62d6a5; }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 1rem;
+    }
+
+    .plan-card {
+      position: relative;
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      padding: 1.5rem;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(150deg, rgba(19, 29, 48, .82), rgba(12, 19, 33, .96));
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .plan-card:hover {
+      border-color: rgba(96, 165, 250, .3);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .22);
+      transform: translateY(-4px);
+    }
+
+    .plan-card-popular {
+      border-color: rgba(59, 130, 246, .55);
+      background: linear-gradient(155deg, rgba(29, 55, 96, .7), rgba(12, 19, 33, .98) 62%);
+      box-shadow: 0 0 38px rgba(37, 99, 235, .1);
+    }
+
+    .plan-card-platinum {
+      border-color: rgba(111, 153, 255, .42);
+      background:
+        radial-gradient(ellipse at 90% 0, rgba(88, 125, 230, .17), transparent 55%),
+        linear-gradient(155deg, #17223c, #0d1424 70%);
+      box-shadow: 0 0 48px rgba(78, 111, 220, .12);
+    }
+
+    .plan-badge {
+      align-self: flex-start;
+      margin-bottom: .9rem;
+      padding: .3rem .6rem;
+      border: 1px solid rgba(96, 165, 250, .2);
+      border-radius: 99px;
+      color: #a8c9ff;
+      background: rgba(37, 99, 235, .12);
+      font-size: .64rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .plan-card:not(.plan-card-popular):not(.plan-card-platinum) .plan-badge { visibility: hidden; }
+
+    .plan-card h3 {
+      margin-bottom: .35rem;
+      color: #edf3ff;
+      font-size: 1.05rem;
+      font-weight: 660;
+      letter-spacing: -.025em;
+    }
+
+    .plan-description {
+      min-height: 2.8rem;
+      margin-bottom: 1rem;
+      color: #8998ae;
+      font-size: .75rem;
+    }
+
+    .plan-price {
+      margin-bottom: 1.25rem;
+      color: #f3f6ff;
+      font-size: 1.85rem;
+      font-weight: 720;
+      letter-spacing: -.055em;
+      line-height: 1.1;
+    }
+
+    .plan-price span {
+      color: #8e9db3;
+      font-size: .73rem;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .plan-features {
+      flex: 1;
+      gap: .8rem;
+      margin-bottom: 1.5rem;
+      font-size: .74rem;
+    }
+
+    .plan-button { width: 100%; margin-top: auto; }
+
+    .payment-error {
+      margin-bottom: 1.25rem;
+      padding: .9rem 1rem;
+      border: 1px solid rgba(251, 113, 133, .3);
+      border-radius: 12px;
+      color: #fecdd3;
+      background: rgba(159, 18, 57, .15);
+      font-size: .85rem;
+    }
+
+    .payment-error a { margin-left: .3rem; color: #93c5fd; }
+
+    .checkout-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: .5rem;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      vertical-align: -2px;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .faq-list {
+      display: grid;
+      max-width: 820px;
+      gap: .7rem;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .022);
+      transition: border-color .18s ease, background .18s ease;
+    }
+
+    .faq-item[open] {
+      border-color: rgba(96, 165, 250, .24);
+      background: rgba(59, 130, 246, .045);
+    }
+
+    .faq-item summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.15rem 1.25rem;
+      color: #e5edf9;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .faq-item summary::-webkit-details-marker { display: none; }
+
+    .faq-item summary::after {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      border-right: 1.5px solid #83b4ff;
+      border-bottom: 1.5px solid #83b4ff;
+      content: "";
+      transform: translateY(-2px) rotate(45deg);
+      transition: transform .18s ease;
+    }
+
+    .faq-item[open] summary::after { transform: translateY(2px) rotate(225deg); }
+
+    .faq-answer {
+      padding: 0 1.25rem 1.15rem;
+      color: #9aa8bf;
+      font-size: .82rem;
+      line-height: 1.8;
+    }
+
+    .faq-answer strong { color: #dce7f8; }
+
+    .site-footer {
+      padding-block: 4rem 1.5rem;
+      border-top: 1px solid var(--line);
+      background: #080d18 !important;
+      color: #aab6c9;
+    }
+
+    .home-page footer.site-footer {
+      background: #080d18 !important;
+      color: #aab6c9 !important;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.6fr repeat(3, 1fr);
+      gap: 2.5rem;
+      padding-bottom: 2.7rem;
+    }
+
+    .footer-brand img { width: 150px; height: 42px; object-fit: contain; object-position: left; }
+    .footer-brand p { max-width: 330px; margin: .85rem 0 0; color: #8492a8; font-size: .78rem; }
+
+    .footer-column h2 {
+      margin-bottom: .9rem;
+      color: #e0e8f5;
+      font-size: .8rem;
+      font-weight: 650;
+    }
+
+    .footer-column ul { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; }
+    .footer-column a { color: #8998ae; font-size: .75rem; text-decoration: none; }
+    .footer-column a:hover { color: #a7c7ff; }
+    .footer-column p { margin-bottom: .75rem; color: #8998ae; font-size: .74rem; }
+
+    .footer-bottom {
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--line);
+      color: #697991;
+      font-size: .7rem;
+      text-align: center;
+    }
+
+    .home-page .hero-bg {
+      background-image:
+        radial-gradient(ellipse at 78% 34%, rgba(37, 99, 235, .17), transparent 35%),
+        radial-gradient(ellipse at 12% 0, rgba(37, 99, 235, .1), transparent 38%),
+        linear-gradient(180deg, #0b1120 0%, var(--page) 100%) !important;
+    }
+
+    @media (max-width: 1050px) {
+      .desktop-nav { gap: .85rem; }
+      .desktop-nav > a, .nav-dropdown > summary { font-size: .78rem; }
+      .header-actions .button { padding-inline: .85rem; }
+      .pricing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 800px) {
+      .wrap { width: min(var(--content), calc(100% - 2.25rem)); }
+      .desktop-nav { display: none; }
+      .header-inner { min-height: 68px; }
+      .mobile-menu {
+        position: relative;
+        display: block;
+        margin-left: auto;
+      }
+
+      .mobile-menu > summary {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 11px;
+        color: #dce6f6;
+        cursor: pointer;
+        list-style: none;
+      }
+
+      .mobile-menu[open] .mobile-panel {
+        position: absolute;
+        top: calc(100% + .8rem);
+        right: 0;
+        display: grid;
+        width: min(300px, calc(100vw - 2rem));
+        gap: .2rem;
+        padding: .65rem;
+        border: 1px solid var(--line-strong);
+        border-radius: 14px;
+        background: #111a2b;
+        box-shadow: 0 18px 48px rgba(0, 0, 0, .4);
+      }
+
+      .mobile-panel a {
+        padding: .7rem .75rem;
+        border-radius: 9px;
+        color: #c5d0e1;
+        font-size: .84rem;
+        text-decoration: none;
+      }
+
+      .mobile-panel a:hover { color: #fff; background: rgba(59, 130, 246, .12); }
+      .header-actions { gap: .5rem; }
+      .header-actions > .button { min-height: 42px; padding: .6rem .8rem; font-size: .78rem; }
+      .hero-grid { grid-template-columns: minmax(0, 1.05fr) minmax(220px, .75fr); gap: 2rem; }
+      .hero-art { min-height: 320px; }
+      .sim-body { grid-template-columns: 1fr; }
+      .sim-picker { border-right: 0; border-bottom: 1px solid var(--line); }
+      .feature-grid { grid-template-columns: 1fr 1fr; }
+      .feature-card:nth-child(2) { transform: none; }
+      .feature-card:nth-child(2):hover { transform: translateY(-5px); }
+      .extension-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .footer-grid { grid-template-columns: 1.4fr 1fr 1fr; }
+      .footer-brand { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 600px) {
+      .wrap { width: min(var(--content), calc(100% - 2rem)); }
+      .brand-logo-crop { width: 145px; height: 43px; }
+      .brand-logo-crop img {
+        top: -82px;
+        left: -27px;
+        width: 210px;
+        height: 210px;
+      }
+      .header-actions > .button-quiet { display: none; }
+      .header-actions > .button-primary { min-height: 40px; padding: .55rem .7rem; font-size: .73rem; }
+      .hero { padding-block: 4.5rem 4rem; }
+      .hero-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+      .hero h1 { font-size: clamp(2.65rem, 13vw, 4rem); }
+      .hero-art { min-height: 280px; }
+      .orbit { width: min(76vw, 300px); }
+      .hero-card { width: min(88%, 330px); }
+      .section { padding-block: 4.25rem; }
+      .section-heading { margin-bottom: 2.25rem; }
+      .section-heading h2 { font-size: 2rem; }
+      .feature-grid,
+      .pricing-grid,
+      .extension-grid { grid-template-columns: 1fr; }
+      .feature-card { min-height: initial; }
+      .plan-description { min-height: initial; }
+      .plan-card:not(.plan-card-popular):not(.plan-card-platinum) .plan-badge { display: none; }
+      .form-preview { grid-template-columns: 1fr; }
+      .preview-field-wide { grid-column: auto; }
+      .sim-window-bar { padding-inline: .85rem; }
+      .sim-target-head { flex-direction: column; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 1.7rem 1rem; }
+      .footer-brand { grid-column: 1 / -1; }
+      .footer-column:last-child { grid-column: 1 / -1; }
+      .faq-item summary { padding: 1rem; font-size: .82rem; }
+      .faq-answer { padding-inline: 1rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f8fafc;
+      --surface: #fff;
+      --surface-raised: #fff;
+      --surface-soft: #f3f5f8;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --faint: #7c8798;
+      --blue: #2563eb;
+      --blue-deep: #1d4ed8;
+      --emerald: #15803d;
+      --radius: 6px;
+    }
+
+    body.home-page { background: var(--page) !important; color: var(--ink) !important; line-height: 1.5; letter-spacing: 0; }
+    .site-header, .home-page nav.site-header { border-bottom-color: var(--line); background: rgba(255,255,255,.92) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .header-inner { min-height: 64px; }
+    .brand-logo { display: block; width: 170px; height: 48px; object-fit: cover; object-position: center; }
+    .desktop-nav > a, .nav-dropdown > summary { color: #475569; font-size: 12px; }
+    .desktop-nav > a:hover, .desktop-nav > a:focus-visible, .nav-dropdown > summary:hover { color: #0f172a; }
+    .dropdown-panel, .mobile-menu[open] .mobile-panel { border-color: var(--line); border-radius: 6px; background: #fff; box-shadow: 0 8px 20px rgba(15,23,42,.08); }
+    .dropdown-panel a, .mobile-panel a { color: #334155; border-radius: 4px; }
+    .dropdown-panel a:hover, .dropdown-panel a:focus-visible, .mobile-panel a:hover { color: #0f172a; background: #f1f5f9; }
+    .dropdown-panel small { color: #64748b; }
+    .button { min-height: 38px; padding: .6rem .9rem; border-radius: 5px; font-size: 12px; transition: background .12s ease,border-color .12s ease,color .12s ease; }
+    .button:hover { transform: none; }
+    .button-primary, .button-primary:hover { border-color: #2563eb; color: #fff; background: #2563eb; box-shadow: none; }
+    .button-primary:hover { border-color: #1d4ed8; background: #1d4ed8; }
+    .button-quiet { border-color: #d7dee8; color: #334155; background: #fff; }
+    .button-quiet:hover { border-color: #b7c2d1; color: #0f172a; background: #f8fafc; }
+    .button-large { min-height: 43px; padding-inline: 1rem; }
+    .hero, .home-page .hero-bg { overflow: visible; padding-block: 4.25rem 3.5rem; background: #fff !important; }
+    .hero::after { display: none; }
+    .hero-grid { grid-template-columns: minmax(0, .85fr) minmax(420px, 1.15fr); gap: clamp(2rem, 5vw, 4rem); }
+    .eyebrow { margin-bottom: 1rem; color: #475569; font-size: 10px; letter-spacing: .1em; }
+    .eyebrow-dot { width: 7px; height: 7px; background: #16a34a; box-shadow: none; }
+    .hero h1 { margin-bottom: 1rem; color: #0f172a; font-size: clamp(2.5rem, 5.3vw, 4.2rem); font-weight: 650; letter-spacing: -.06em; line-height: 1.04; }
+    .hero h1 span { color: #2563eb; background: none; -webkit-text-fill-color: currentColor; }
+    .hero-copy { margin-bottom: 1.35rem; color: #475569; font-size: 14px; line-height: 1.65; }
+    .hero-actions { margin-bottom: 1.2rem; }
+    .trust-row { gap: .55rem 1rem; color: #596579; font-size: 10px; }
+    .trust-row i { color: #16834b; }
+    .hero-art { display: none; }
+    .section { padding-block: clamp(3.5rem, 7vw, 5.5rem); }
+    .section-soft { border-block-color: var(--line); background: #f3f5f8; }
+    .section-heading { margin-bottom: 2rem; text-align: left; }
+    .section-kicker { margin-bottom: .55rem; color: #2563eb; font-size: 9px; letter-spacing: .1em; }
+    .section-heading h2 { margin-bottom: .55rem; color: #0f172a; font-size: clamp(1.65rem, 3.2vw, 2.3rem); font-weight: 650; letter-spacing: -.045em; line-height: 1.15; }
+    .section-heading p { max-width: 700px; color: #64748b; font-size: 13px; }
+    .simulator { border: 1px solid #d5dce6; border-radius: 6px; background: #fff; box-shadow: none; }
+    .sim-window-bar { min-height: 38px; padding: .45rem .75rem; border-bottom-color: #dbe1e9; background: #f1f3f6; }
+    .window-controls { gap: 5px; }
+    .window-dot { width: 8px; height: 8px; }
+    .window-title { color: #657187; font-size: 10px; }
+    .sim-body { grid-template-columns: minmax(155px, .7fr) minmax(0, 1.3fr); }
+    .sim-picker { padding: .9rem; border-right-color: #e2e8f0; }
+    .sim-picker h3, .sim-target h3 { margin-bottom: .65rem; color: #1e293b; font-size: 11px; }
+    .preset-switcher { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 3px; border: 1px solid #e2e8f0; background: #f8fafc; }
+    .preset-button { min-height: 29px; border: 1px solid transparent; border-radius: 3px; color: #64748b; background: transparent; font-size: 10px; font-weight: 600; cursor: pointer; }
+    .preset-button:hover { color: #1e293b; background: #fff; }
+    .preset-button.is-active, .preset-button[aria-pressed="true"] { border-color: #d7dee8; color: #1e293b; background: #fff; }
+    .preset-button:focus-visible { outline: 2px solid rgba(37,99,235,.55); outline-offset: 1px; }
+    .preset-description { min-height: 28px; padding-top: 7px; color: #64748b; font-size: 9px; }
+    .client-option { gap: .5rem; margin-bottom: .45rem; padding: .55rem; border-color: #e2e8f0; border-radius: 5px; background: #fff; }
+    .client-option:hover, .client-option:has(input:checked) { border-color: #93b4ee; background: #f5f8ff; }
+    .client-option input { width: 13px; height: 13px; }
+    .client-option strong { color: #1e293b; font-size: 10px; }
+    .client-option small { color: #64748b; font-size: 9px; }
+    .sim-run { margin-top: .2rem; font-size: 10px; }
+    .sim-target { padding: .9rem; }
+    .sim-target-head { align-items: center; margin-bottom: .7rem; }
+    .filing-status { gap: 5px; padding: .24rem .45rem; border-color: #d8dee8; border-radius: 4px; color: #596579; background: #f8fafc; font-size: 9px; }
+    .filing-status::before { width: 6px; height: 6px; background: #94a3b8; box-shadow: none; }
+    .filing-status.is-running { border-color: #f0d7a4; color: #805c12; background: #fffbeb; }
+    .filing-status.is-running::before { background: #d99a1c; box-shadow: none; }
+    .filing-status.is-complete { border-color: #bee2cc; color: #187246; background: #f0fdf4; }
+    .form-preview { gap: .55rem; padding: .65rem; border-color: #e2e8f0; border-radius: 5px; background: #f8fafc; }
+    .preview-field label { margin-bottom: .25rem; color: #596579; font-size: 9px; }
+    .preview-field input, .preview-field textarea { min-height: 32px; padding: .42rem .5rem; border-color: #dce3ec; border-radius: 4px; color: #1e293b; background: #fff; font-size: 9px; }
+    .preview-field input::placeholder, .preview-field textarea::placeholder { color: #94a3b8; }
+    .console { min-height: 53px; margin-top: .55rem; padding: .55rem .65rem; border-color: #dce3ec; border-radius: 4px; color: #256b43; background: #f8fafc; font-size: 9px; line-height: 1.5; }
+    .console-label { color: #64748b; }
+    .console-cursor { width: 5px; height: 10px; background: #2563eb; }
+    .feature-grid { gap: 12px; }
+    .feature-card { min-height: 0; padding: 0 0 1rem; border-color: #e2e8f0; border-radius: 6px; background: #fff; transition: border-color .12s ease; }
+    .feature-card:nth-child(2) { transform: none; }
+    .feature-card::before { display: none; }
+    .feature-card:hover, .feature-card:nth-child(2):hover { border-color: #b8c5d6; box-shadow: none; transform: none; }
+    .feature-card-head { display: flex; min-height: 35px; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 1rem; padding: 0 1rem; border-bottom: 1px solid #e2e8f0; color: #5b6678; background: #f8fafc; font-size: 9px; font-weight: 600; }
+    .feature-card-head i { color: #64748b; font-size: 10px; }
+    .feature-icon { display: none; }
+    .feature-card h3, .feature-card p, .feature-card .feature-list { margin-right: 1rem; margin-left: 1rem; }
+    .feature-card h3 { margin-bottom: .45rem; color: #172033; font-size: 14px; letter-spacing: -.02em; }
+    .feature-card h3 span { color: #64748b; font-weight: 500; }
+    .feature-card p { margin-bottom: .8rem; color: #64748b; font-size: 11px; }
+    .feature-list { gap: .45rem; color: #475569; font-size: 10px; }
+    .feature-list i, .plan-features i { color: #16834b; }
+    .extension-section { border-block-color: var(--line); background: #f3f5f8; }
+    .extension-copy h2 { color: #0f172a; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 650; letter-spacing: -.045em; }
+    .extension-copy > p { color: #64748b; font-size: 13px; }
+    .step-number { width: 28px; height: 28px; border-color: #d3deef; border-radius: 5px; color: #315998; background: #f5f8fe; font-size: 10px; }
+    .step h3 { color: #263246; font-size: 11px; }
+    .step p { color: #687386; font-size: 10px; }
+    .bookmark-card { padding: 1.2rem; border-color: #e2e8f0; border-radius: 6px; background: #fff; box-shadow: none; text-align: left; }
+    .bookmark-card h3 { color: #172033; font-size: 13px; }
+    .bookmark-card > p { color: #64748b; font-size: 10px; }
+    .bookmarklet-btn { min-height: 36px; margin-bottom: .65rem; padding: .5rem .75rem; border: 1px solid #2563eb; border-radius: 5px; color: #fff !important; background: #2563eb; box-shadow: none; font-size: 10px; }
+    .bookmarklet-btn:hover { background: #1d4ed8; box-shadow: none; transform: none; }
+    .code-sample { margin-top: .5rem; padding: .7rem; border-color: #e2e8f0; border-radius: 4px; color: #334155; background: #f8fafc; font-size: 9px; }
+    .code-sample span { color: #16834b; }
+    .pricing-grid { gap: 12px; }
+    .plan-card { padding: 1rem; border-color: #e2e8f0; border-radius: 6px; background: #fff; transition: border-color .12s ease; }
+    .plan-card:hover { border-color: #b8c5d6; box-shadow: none; transform: none; }
+    .plan-card-popular { border-color: #93b4ee; background: #fff; box-shadow: none; }
+    .plan-card-platinum { border-color: #cbd5e1; background: #fff; box-shadow: none; }
+    .plan-badge { margin-bottom: .7rem; padding: .24rem .45rem; border-color: #dce2e9; border-radius: 4px; color: #536176; background: #f8fafc; font-size: 8px; }
+    .plan-card-popular .plan-badge { border-color: #d0def5; color: #315998; background: #f4f8ff; }
+    .plan-card h3 { color: #172033; font-size: 14px; }
+    .plan-description { color: #64748b; font-size: 10px; }
+    .plan-price { color: #0f172a; font-size: 24px; }
+    .plan-price span { color: #667085; font-size: 10px; }
+    .plan-features { color: #475569; font-size: 10px; }
+    .plan-button { width: 100%; margin-top: auto; }
+    .payment-error { padding: .65rem .8rem; border-color: #efc7c3; border-radius: 5px; color: #8f2821; background: #fff7f6; font-size: 11px; }
+    .payment-error a { color: #1d4ed8; }
+    .faq-list { gap: 0; border: 1px solid #e2e8f0; background: #fff; }
+    .faq-item, .faq-item[open] { border: 0; border-bottom: 1px solid #e2e8f0; border-radius: 0; background: #fff; }
+    .faq-item:last-child { border-bottom: 0; }
+    .faq-item summary { padding: .9rem 1rem; color: #263246; font-size: 11px; }
+    .faq-item summary::after { border-color: #64748b; }
+    .faq-answer { padding: 0 1rem .9rem; color: #64748b; font-size: 10px; line-height: 1.65; }
+    .faq-answer strong { color: #263246; }
+    .site-footer, .home-page footer.site-footer { padding-block: 2.5rem 1.25rem; border-top-color: var(--line); color: #475569 !important; background: #fff !important; }
+    .footer-brand img { width: 170px; height: 48px; object-fit: cover; object-position: center; }
+    .footer-brand p, .footer-column p { color: #64748b; font-size: 10px; }
+    .footer-column h2 { color: #263246; font-size: 11px; }
+    .footer-column a { color: #64748b; font-size: 10px; }
+    .footer-column a:hover { color: #1d4ed8; }
+    .footer-bottom { border-top-color: var(--line); color: #7b8494; font-size: 9px; }
+    @media (max-width: 1050px) {
+      .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(350px, 1.1fr); gap: 1.5rem; }
+      .pricing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 800px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 1.4rem; }
+      .sim-body { grid-template-columns: minmax(180px, .7fr) minmax(0, 1.3fr); }
+      .extension-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    }
+    @media (max-width: 600px) {
+      .brand-logo { width: 150px; height: 42px; }
+      .hero { padding-block: 3.5rem 2.75rem; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: clamp(2.4rem, 12vw, 3.6rem); }
+      .section { padding-block: 3.25rem; }
+      .section-heading { margin-bottom: 1.5rem; }
+      .feature-grid, .pricing-grid, .extension-grid { grid-template-columns: 1fr; }
+      .feature-card { min-height: 0; }
+      .sim-body { grid-template-columns: 1fr; }
+      .sim-picker { border-right: 0; border-bottom: 1px solid #e2e8f0; }
+      .sim-target-head { flex-direction: row; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body class="home-page">
+  <form id="payment-csrf-token" hidden>{% csrf_token %}</form>
+
+  <nav class="site-header" aria-label="Main navigation">
+    <div class="wrap header-inner">
+      <a class="brand" href="{% url 'home' %}" aria-label="ProCAC home">
+        <img class="brand-logo" src="{% static 'frontend/assets/images/hero/procac-high-resolution-logo.png' %}" alt="ProCAC">
+      </a>
+
+      <div class="desktop-nav">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="#features">About ProCAC</a>
+        <a href="#live-demo">Live demo</a>
+        <a href="#extension">Extension</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <details class="nav-dropdown">
+          <summary>Log in</summary>
+          <div class="dropdown-panel">
+            <a href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Sign in to dashboard</a>
+            <small>New registration</small>
+            <a href="{% url 'signup' %}?role=consultant"><i class="fa-solid fa-user-tie" aria-hidden="true"></i> Sign up as a consultant</a>
+            <a href="{% url 'signup' %}?role=lawyer"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> Sign up as a lawyer</a>
+          </div>
+        </details>
+      </div>
+
+      <details class="mobile-menu">
+        <summary aria-label="Open navigation menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></summary>
+        <div class="mobile-panel">
+          <a href="{% url 'home' %}">Home</a>
+          <a href="#features">About ProCAC</a>
+          <a href="#live-demo">Live demo</a>
+          <a href="#extension">Extension</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#faq">FAQ</a>
+          <a href="{% url 'login' %}">Sign in</a>
+          <a href="{% url 'signup' %}">Create an account</a>
+        </div>
+      </details>
+
+      <div class="header-actions">
+        <a href="{% url 'login' %}" class="button button-quiet">Log in</a>
+        <a href="{% url 'signup' %}" class="button button-primary">Get started <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero hero-bg">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow"><span class="eyebrow-dot"></span> Filing, made effortless</div>
+        <h1>Automate CAC filings in <span>one click.</span></h1>
+        <p class="hero-copy">
+          Designed for accredited CAC consultants, lawyers, and legal agents. Eliminate repetitive typing, prevent session timeouts, and auto-populate Business Names, LTD Shareholders, and IT Trustees directly onto live CAC portal forms.
+        </p>
+        <div class="hero-actions">
+          <a href="#live-demo" class="button button-primary button-large"><i class="fa-solid fa-play" aria-hidden="true"></i> Try the interactive demo</a>
+          <a href="#extension" class="button button-quiet button-large"><i class="fa-brands fa-chrome" aria-hidden="true"></i> Explore the extension</a>
+        </div>
+        <div class="trust-row" aria-label="NIN compliance and platform benefits">
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> BN, LTD &amp; IT filings</span>
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> No CAC password access</span>
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> 11-digit NIN format checks</span>
+        </div>
+      </div>
+
+      <div class="simulator" id="live-demo">
+        <div class="sim-window-bar">
+          <div class="window-controls" aria-hidden="true">
+            <span class="window-dot window-dot-red"></span>
+            <span class="window-dot window-dot-yellow"></span>
+            <span class="window-dot window-dot-green"></span>
+          </div>
+          <span class="window-title">crp.cac.gov.ng / registration / new-filing</span>
+          <span class="filing-status" id="fillStatus" role="status" aria-live="polite">Waiting to execute</span>
+        </div>
+
+        <div class="sim-body">
+          <div class="sim-picker">
+            <h3>Sample filing</h3>
+            <div class="preset-switcher" role="group" aria-label="Select registration type">
+              <button type="button" class="preset-button is-active" data-demo-type="BN" aria-pressed="true">BN</button>
+              <button type="button" class="preset-button" data-demo-type="LTD" aria-pressed="false">LTD</button>
+              <button type="button" class="preset-button" data-demo-type="IT" aria-pressed="false">IT</button>
+            </div>
+            <div class="preset-description" id="presetDescription">Business Name · Solo proprietor</div>
+            <button type="button" class="button button-primary sim-run" id="runSimulation">
+              <i class="fa-solid fa-play" aria-hidden="true"></i> Run AutoFill preview
+            </button>
+          </div>
+
+          <div class="sim-target">
+            <div class="sim-target-head">
+              <h3>CAC form preview</h3>
+              <span class="window-title">portal fields</span>
+            </div>
+            <div class="form-preview">
+              <div class="preview-field preview-field-wide">
+                <label for="simName">#option1 · Proposed name</label>
+                <input id="simName" type="text" placeholder="Waiting for profile data..." readonly>
+              </div>
+              <div class="preview-field">
+                <label for="simNIN">#nin · Proprietor / director</label>
+                <input id="simNIN" type="text" placeholder="—" readonly>
+              </div>
+              <div class="preview-field">
+                <label for="simEmail">#email · Contact email</label>
+                <input id="simEmail" type="text" placeholder="—" readonly>
+              </div>
+              <div class="preview-field preview-field-wide">
+                <label for="simDesc">#natureOfBusiness · Filing description</label>
+                <textarea id="simDesc" rows="2" placeholder="—" readonly></textarea>
+              </div>
+            </div>
+            <div class="console" id="codeLog" role="log" aria-live="polite" aria-atomic="true">
+              <span class="console-label">Console output</span><br>
+              <span id="consoleMessage">Select a filing type and run the simulator to begin.</span><span class="console-cursor" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="features" class="section">
+      <div class="wrap">
+        <div class="section-heading">
+          <span class="section-kicker">One workspace, every filing</span>
+          <h2>Purpose-built for every CAC registration type</h2>
+          <p>ProCAC structures and populates your records accurately, whether you file Business Names, companies, or incorporated trustees.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-card-head"><span>BN · BUSINESS NAME</span><i class="fa-solid fa-store" aria-hidden="true"></i></div>
+            <h3>Business Names <span>(BN)</span></h3>
+            <p>Fast completion for sole proprietors and partnerships, from nature of business to address details.</p>
+            <ul class="feature-list">
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Proprietor NIN &amp; address autofill</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Multiple branch addresses</li>
+            </ul>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card-head"><span>LTD · PRIVATE LIMITED</span><i class="fa-solid fa-building" aria-hidden="true"></i></div>
+            <h3>Company registration <span>(LTD)</span></h3>
+            <p>Map multi-director shareholder records, share capital splits, and Persons with Significant Control details.</p>
+            <ul class="feature-list">
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Share capital calculations</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Multiple directors &amp; PSCs</li>
+            </ul>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card-head"><span>IT · INCORPORATED TRUSTEES</span><i class="fa-solid fa-people-roof" aria-hidden="true"></i></div>
+            <h3>Incorporated Trustees <span>(IT)</span></h3>
+            <p>Manage trustee profiles, multi-clause aims and objectives, and officer designations in one workflow.</p>
+            <ul class="feature-list">
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Batch trustee data entry</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Constitution &amp; aims formatting</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="extension" class="section extension-section">
+      <div class="wrap extension-grid">
+        <div class="extension-copy">
+          <span class="section-kicker">Zero setup friction</span>
+          <h2>Work your way: extension or bookmarklet</h2>
+          <p>Install the Chrome extension or drag the lightweight bookmarklet into your browser bookmarks. Your team can start filing without a complicated setup.</p>
+          <div class="steps">
+            <div class="step">
+              <span class="step-number">1</span>
+              <div><h3>Select a saved client file</h3><p>Keep client records organized in your consultant workspace.</p></div>
+            </div>
+            <div class="step">
+              <span class="step-number">2</span>
+              <div><h3>Open the CAC portal form</h3><p>Navigate to pre.cac.gov.ng or crp.cac.gov.ng as usual.</p></div>
+            </div>
+            <div class="step">
+              <span class="step-number">3</span>
+              <div><h3>Autofill and review</h3><p>Populate form fields in moments, then review your filing before submission.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bookmark-card">
+          <h3>Try the bookmarklet</h3>
+          <p>Drag this button to your browser bookmarks bar to try it on a page:</p>
+          <a href="javascript:(function(){alert('ProCAC AutoFill active on this page!');})();" class="bookmarklet-btn">
+            <i class="fa-solid fa-bolt" aria-hidden="true"></i>&nbsp; ProCAC AutoFill
+          </a>
+          <div class="code-sample"><span>// Bookmarklet script snapshot</span><br>document.querySelector('#option1').value = clientData.name;</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" class="section section-soft">
+      <div class="wrap">
+        <div class="section-heading">
+          <span class="section-kicker">Straightforward plans</span>
+          <h2>Flexible pricing for every consultant</h2>
+          <p>Choose daily, weekly, or extended access to fit your filing volume.</p>
+        </div>
+
+        <div id="payment-error" class="payment-error" role="alert" aria-live="assertive" hidden>
+          <span id="payment-error-message"></span>
+          <a id="payment-login-link" href="{% url 'login' %}?next={% url 'home' %}" hidden>Sign in</a>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="plan-card">
+            <span class="plan-badge">Daily access</span>
+            <h3>Starter</h3>
+            <p class="plan-description">Ideal for casual filings and testing.</p>
+            <div class="plan-price">₦500 <span>/ day</span></div>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Up to 5 client profiles</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Quick portal entry</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Standard support</li>
+            </ul>
+            <button type="button" class="button button-quiet plan-button" data-subscribe-plan="starter">Choose Starter</button>
+          </article>
+
+          <article class="plan-card">
+            <span class="plan-badge">Weekly access</span>
+            <h3>Standard</h3>
+            <p class="plan-description">A practical fit for a steady weekly filing schedule.</p>
+            <div class="plan-price">₦3,000 <span>/ week</span></div>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Up to 15 client profiles</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> 5 Business Names (BN)</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> 5 Limited Companies (LTD)</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> 5 Incorporated Trustees (IT)</li>
+            </ul>
+            <button type="button" class="button button-quiet plan-button" data-subscribe-plan="standard">Choose Standard</button>
+          </article>
+
+          <article class="plan-card plan-card-popular">
+            <span class="plan-badge">Popular</span>
+            <h3>Enterprise</h3>
+            <p class="plan-description">For active consultants and growing teams.</p>
+            <div class="plan-price">₦10,000 <span>/ month</span></div>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Up to 25 client profiles</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> BN &amp; LTD autofill support</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Bookmarklet generator</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Standard email support</li>
+            </ul>
+            <button type="button" class="button button-primary plan-button" data-subscribe-plan="enterprise">Choose Enterprise</button>
+          </article>
+
+          <article class="plan-card plan-card-platinum">
+            <span class="plan-badge"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> Platinum · Ultimate</span>
+            <h3>Platinum</h3>
+            <p class="plan-description">Enterprise-scale operations for law firms.</p>
+            <div class="plan-price">₦35,000 <span>/ 2 months</span></div>
+            <ul class="plan-features">
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Unlimited client profiles</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> BN, LTD &amp; IT Trustee autofill</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Full Chrome extension access</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> NIN document OCR auto-extract</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> AI support for object memorandum</li>
+            </ul>
+            <button type="button" class="button button-primary plan-button" data-subscribe-plan="ultimate_enterprise">Choose Platinum</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="wrap">
+        <div class="section-heading">
+          <span class="section-kicker">Good to know</span>
+          <h2>Frequently asked questions</h2>
+          <p>Answers about security, reliability, and using ProCAC with the CAC portal.</p>
+        </div>
+
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary>Does this app require my official CAC account password?</summary>
+            <div class="faq-answer"><strong>No.</strong> ProCAC never asks for, stores, or accesses your official CAC CRP login credentials. You log in to your CAC account as usual; the extension or bookmarklet fills fields on your active browser tab.</div>
+          </details>
+          <details class="faq-item">
+            <summary>What happens when CAC updates their CRP portal fields?</summary>
+            <div class="faq-answer">Our service monitors field selectors on pre.cac.gov.ng and crp.cac.gov.ng. When registration forms change, field mappings are updated so your extension can target the correct inputs.</div>
+          </details>
+          <details class="faq-item">
+            <summary>Is client data such as NIN, phone, and address securely stored?</summary>
+            <div class="faq-answer">Saved client profile records are protected with database encryption, helping keep sensitive details such as NINs and private phone numbers protected and available to your account.</div>
+          </details>
+          <details class="faq-item">
+            <summary>Will ProCAC store or share my clients' confidential details?</summary>
+            <div class="faq-answer"><strong>Your client data is yours.</strong> Client details are used to support your filing workflow and are not sold or used for third-party marketing.</div>
+          </details>
+          <details class="faq-item">
+            <summary>What happens if the official CAC CRP portal goes down or changes?</summary>
+            <div class="faq-answer">Portal availability and field changes are outside ProCAC’s control. We maintain field mappings as the portal evolves; please review each filing on the official portal before submission.</div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="{% url 'home' %}" aria-label="ProCAC home">
+            <img class="brand-logo" src="{% static 'frontend/assets/images/hero/procac-high-resolution-logo.png' %}" alt="ProCAC">
+          </a>
+          <p>Filing automation and client data management built for accredited Corporate Affairs Commission (CAC) consultants and legal practitioners in Nigeria.</p>
+        </div>
+
+        <nav class="footer-column" aria-label="Product links">
+          <h2>Product</h2>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#live-demo">Live demo</a></li>
+            <li><a href="#extension">Chrome extension</a></li>
+            <li><a href="#pricing">Pricing plans</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer-column" aria-label="Registration links">
+          <h2>CAC registration</h2>
+          <ul>
+            <li><a href="#features">Business Name (BN)</a></li>
+            <li><a href="#features">Private Limited (LTD)</a></li>
+            <li><a href="#features">Incorporated Trustee (IT)</a></li>
+            <li><a href="#live-demo">CAC field simulator</a></li>
+          </ul>
+        </nav>
+
+        <div class="footer-column">
+          <h2>Legal &amp; security</h2>
+          <p>ProCAC is an independent workflow utility and is not affiliated with the Corporate Affairs Commission of Nigeria.</p>
+          <a href="{% url 'signup' %}">Create your secure account</a>
+        </div>
+      </div>
+      <div class="footer-bottom">© 2026 ProCAC. Designed for Nigerian legal consultants and corporate agents.</div>
+    </div>
+  </footer>
+
+  <script src="{% static 'frontend/assets/js/payments.js' %}" defer></script>
+  <script>
+    (() => {
+      const demoData = {
+        BN: {
+          name: "KOKO FASHION ENTERPRISE",
+          nin: "38920194820",
+          email: "koko.fashion@gmail.com",
+          desc: "General retail, tailoring services, textile distribution, and fashion design.",
+          label: "Business Name · Solo proprietor"
+        },
+        LTD: {
+          name: "APEX TECHNOLOGY SOLUTIONS LTD",
+          nin: "90218402918",
+          email: "info@apextech.ng",
+          desc: "Software development, cloud engineering, IT consulting, and data analytics.",
+          label: "Private Limited · 2 directors & shareholders"
+        },
+        IT: {
+          name: "HOPE & PROGRESS FOUNDATION",
+          nin: "67102948102",
+          email: "contact@hopeprogress.org",
+          desc: "Community empowerment, youth educational scholarships, and poverty alleviation.",
+          label: "Incorporated Trustee · 3 trustees & objectives"
+        }
+      };
+
+      const fields = {
+        name: document.getElementById("simName"),
+        nin: document.getElementById("simNIN"),
+        email: document.getElementById("simEmail"),
+        desc: document.getElementById("simDesc")
+      };
+      const button = document.getElementById("runSimulation");
+      const status = document.getElementById("fillStatus");
+      const consoleMessage = document.getElementById("consoleMessage");
+      const presetDescription = document.getElementById("presetDescription");
+      const presetButtons = [...document.querySelectorAll("[data-demo-type]")];
+      let activeType = "BN";
+      let simulationTimer;
+      let typingTimer;
+
+      function resetSimulation(type) {
+        if (!demoData[type]) return;
+        activeType = type;
+        window.clearTimeout(simulationTimer);
+        window.clearTimeout(typingTimer);
+        button.disabled = false;
+        presetButtons.forEach((preset) => {
+          const selected = preset.dataset.demoType === type;
+          preset.classList.toggle("is-active", selected);
+          preset.setAttribute("aria-pressed", String(selected));
+        });
+        presetDescription.textContent = demoData[type].label;
+        Object.values(fields).forEach((field) => { field.value = ""; });
+        status.className = "filing-status";
+        status.textContent = "Waiting to execute";
+        consoleMessage.textContent = `Profile ${type} selected. Run AutoFill to begin.`;
+      }
+
+      function typeMessage(message) {
+        window.clearTimeout(typingTimer);
+        consoleMessage.textContent = "";
+        let index = 0;
+        const typeNextCharacter = () => {
+          consoleMessage.textContent += message[index];
+          index += 1;
+          if (index < message.length) {
+            typingTimer = window.setTimeout(typeNextCharacter, 17);
+          } else {
+            typingTimer = undefined;
+          }
+        };
+        typeNextCharacter();
+      }
+
+      function runSimulation() {
+        const data = demoData[activeType];
+        if (!data || button.disabled) return;
+
+        button.disabled = true;
+        Object.values(fields).forEach((field) => { field.value = ""; });
+        status.className = "filing-status is-running";
+        status.textContent = "Transferring data";
+        typeMessage(`> Connecting to crp.cac.gov.ng · preparing ${activeType} profile...`);
+
+        simulationTimer = window.setTimeout(() => {
+          fields.name.value = data.name;
+          fields.nin.value = data.nin;
+          fields.email.value = data.email;
+          fields.desc.value = data.desc;
+          status.className = "filing-status is-complete";
+          status.textContent = "Profile populated";
+          button.disabled = false;
+          typeMessage("> Fields populated and input events dispatched · ready for your review.");
+          simulationTimer = undefined;
+        }, 850);
+      }
+
+      presetButtons.forEach((preset) => {
+        preset.addEventListener("click", () => resetSimulation(preset.dataset.demoType));
+      });
+      button.addEventListener("click", runSimulation);
+
+      document.querySelectorAll(".nav-dropdown, .mobile-menu").forEach((menu) => {
+        menu.addEventListener("toggle", () => {
+          if (!menu.open) return;
+          document.querySelectorAll(".nav-dropdown, .mobile-menu").forEach((otherMenu) => {
+            if (otherMenu !== menu) otherMenu.open = false;
+          });
+        });
+      });
+      document.addEventListener("click", (event) => {
+        if (event.target instanceof Element && !event.target.closest(".nav-dropdown, .mobile-menu")) {
+          document.querySelectorAll(".nav-dropdown[open], .mobile-menu[open]").forEach((menu) => {
+            menu.open = false;
+          });
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          document.querySelectorAll(".nav-dropdown[open], .mobile-menu[open]").forEach((menu) => {
+            menu.open = false;
+            menu.querySelector("summary").focus();
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

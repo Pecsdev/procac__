@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "ProCAC Client Autofill",
+  "version": "1.2.0",
+  "description": "Load your saved ProCAC client profiles and fill CAC portal forms.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*",
+    "https://cac.gov.ng/*",
+    "https://*.cac.gov.ng/*",
+    "https://icrp.cac.gov.ng/*",
+    "https://pre.cac.gov.ng/*",
+    "http://pre.cac.gov.ng/*"
+  ],
+  "action": {
+    "default_title": "ProCAC Autofill",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://cac.gov.ng/*",
+        "https://*.cac.gov.ng/*",
+        "https://icrp.cac.gov.ng/*",
+        "https://pre.cac.gov.ng/*",
+        "http://pre.cac.gov.ng/*"
+      ],
+      "js": [
+        "content-script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

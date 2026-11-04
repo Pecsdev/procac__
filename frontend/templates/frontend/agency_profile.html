@@ -1,0 +1,595 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include "frontend/favicon.html" %}
+  <title>Agency Profile | ProCAC</title>
+  <meta name="description" content="Manage ProCAC firm credentials and extension settings.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --canvas: #f7f8fa;
+      --blue: #2563eb;
+      --sidebar: #0b1329;
+      --sidebar-width: 232px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button, input, textarea { font: inherit; }
+    a { color: inherit; }
+
+    .sidebar {
+      position: fixed;
+      z-index: 20;
+      inset: 0 auto 0 0;
+      display: flex;
+      width: var(--sidebar-width);
+      flex-direction: column;
+      border-right: 1px solid #1b2742;
+      color: #cbd5e1;
+      background: var(--sidebar);
+    }
+    .brand {
+      display: flex;
+      min-height: 66px;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      border-bottom: 1px solid #1b2742;
+      text-decoration: none;
+    }
+    .brand-mark { width: 29px; height: 29px; object-fit: contain; }
+    .brand-wordmark { width: 112px; height: auto; filter: brightness(0) invert(1); }
+    .nav-label { padding: 18px 18px 7px; color: #8290a9; font-size: 9px; font-weight: 650; letter-spacing: .11em; text-transform: uppercase; }
+    .sidebar-nav { display: grid; gap: 3px; padding: 0 9px; }
+    .sidebar-nav a {
+      display: flex;
+      min-height: 36px;
+      align-items: center;
+      gap: 11px;
+      padding: 0 10px;
+      border-radius: 4px;
+      color: #aab5c8;
+      font-size: 11px;
+      text-decoration: none;
+    }
+    .sidebar-nav a:hover { color: #fff; background: #17233c; }
+    .sidebar-nav a[aria-current="page"] { color: #fff; background: #172c52; }
+    .sidebar-nav i { width: 15px; color: #8da1c3; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding: 13px 18px; border-top: 1px solid #1b2742; color: #8997ae; font-size: 10px; }
+
+    .workspace { min-height: 100vh; margin-left: var(--sidebar-width); }
+    .topbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.97);
+    }
+    .breadcrumb { color: #7b8494; font-size: 11px; }
+    .breadcrumb strong { color: #263043; font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .subscription-link {
+      display: inline-flex;
+      min-height: 31px;
+      align-items: center;
+      gap: 6px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      color: #374151;
+      background: #fff;
+      font-size: 10px;
+      font-weight: 550;
+      text-decoration: none;
+    }
+    .subscription-link:hover { border-color: #c5ccd6; background: #f8fafc; }
+    .profile-pill { display: flex; align-items: center; gap: 8px; color: #374151; font-size: 10px; font-weight: 550; }
+    .profile-avatar {
+      display: grid;
+      width: 27px;
+      height: 27px;
+      place-items: center;
+      border: 1px solid #dfe4eb;
+      border-radius: 50%;
+      color: #475569;
+      background: #f4f6f9;
+      font-size: 9px;
+      font-weight: 650;
+      overflow: hidden;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .consultant-avatar-row { display: flex; align-items: center; gap: 16px; }
+    .consultant-avatar {
+      display: block;
+      width: 72px;
+      height: 72px;
+      flex: 0 0 72px;
+      overflow: hidden;
+      border: 1px solid #334155;
+      border-radius: 50%;
+      background: #0f172a;
+      object-fit: cover;
+    }
+    .consultant-avatar-copy { display: grid; gap: 5px; }
+    .consultant-avatar-copy strong { color: #0f172a; font-size: 11px; }
+    .consultant-avatar-copy .field-help { margin-top: 0; }
+
+    main { width: min(1050px, 100%); margin: 0 auto; padding: 25px 28px 112px; }
+    .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
+    .eyebrow { margin-bottom: 4px; color: #64748b; font-size: 9px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0 0 4px; color: var(--ink); font-size: 21px; font-weight: 650; letter-spacing: -.035em; line-height: 1.2; }
+    .page-heading p { margin: 0; color: var(--muted); font-size: 11px; }
+
+    .summary-bar {
+      display: flex;
+      min-height: 64px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 13px;
+      padding: 10px 13px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .firm-summary { min-width: 0; }
+    .firm-name { overflow: hidden; color: #1d2738; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+    .firm-accreditation { margin-top: 3px; color: #697386; font-size: 9px; }
+    .summary-statuses { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+    .status-badge {
+      display: inline-flex;
+      min-height: 24px;
+      align-items: center;
+      gap: 6px;
+      padding: 0 7px;
+      border: 1px solid #e6eaf0;
+      color: #526074;
+      background: #fafbfc;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+    .status-badge i { font-size: 8px; }
+    .status-badge.active { border-color: #cce6d7; color: #21734b; background: #f4fbf7; }
+    .status-badge.inactive { border-color: #e6eaf0; color: #697386; background: #fafbfc; }
+
+    .notice { margin-bottom: 12px; padding: 9px 11px; border: 1px solid #c9d8f6; color: #34425b; background: #f4f7fd; font-size: 10px; }
+    .notice.success { border-color: #cae7d8; color: #216645; background: #f4fbf7; }
+    .notice.error { border-color: #efc7c3; color: #8f2821; background: #fff7f6; }
+
+    form { margin: 0; }
+    .section {
+      min-width: 0;
+      margin: 0 0 11px;
+      padding: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .section > legend { float: none; width: 100%; margin: 0; padding: 0; }
+    .section-heading {
+      display: flex;
+      min-height: 37px;
+      align-items: center;
+      gap: 9px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      background: #f8f9fb;
+    }
+    .section-number { color: #778194; font-size: 9px; font-weight: 650; font-variant-numeric: tabular-nums; }
+    .section-heading h2 { margin: 0; color: #252d3b; font-size: 11px; font-weight: 600; }
+    .section-hint { margin-left: auto; color: #8992a1; font-size: 9px; }
+    .section-body { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 11px 12px; padding: 12px; }
+    .field { grid-column: span 6; min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .field.third { grid-column: span 4; }
+    .field label { display: block; margin-bottom: 5px; color: #465064; font-size: 10px; font-weight: 550; }
+    .field input, .field textarea {
+      display: block;
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 9px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      outline: 0;
+      color: #0f172a;
+      background: #fff;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+    .field textarea { min-height: 52px; resize: vertical; }
+    .field input::placeholder, .field textarea::placeholder { color: #a0a8b5; }
+    .field input:focus, .field textarea:focus { border-color: #2563eb; }
+    .field input[readonly] { color: #475569; background: #f8f9fb; }
+    .field-help { margin-top: 4px; color: #8992a1; font-size: 9px; }
+    .field-error { margin-top: 4px; color: #b42318; font-size: 9px; }
+    .inline-field { display: flex; align-items: center; gap: 7px; }
+    .inline-field input { min-width: 0; flex: 1; }
+    .verified-badge {
+      display: inline-flex;
+      min-height: 23px;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 5px;
+      padding: 0 7px;
+      border: 1px solid #d9e3f7;
+      color: #455e91;
+      background: #f5f8fe;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+    .verified-badge.neutral { border-color: #e5e9ef; color: #697386; background: #f8f9fb; }
+    .form-errors { margin-bottom: 12px; padding: 9px 12px; border: 1px solid #efc7c3; color: #8f2821; background: #fff7f6; font-size: 10px; }
+    .form-errors ul { margin: 4px 0 0; padding-left: 18px; }
+
+    .token-input { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important; }
+    .token-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+    .token-actions form { display: inline-flex; }
+    .token-note { margin-top: 7px; color: #7a8494; font-size: 9px; }
+
+    .flat-button {
+      display: inline-flex;
+      min-height: 31px;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 9px;
+      border: 1px solid #dce2e9;
+      border-radius: 5px;
+      color: #3e4859;
+      background: #fff;
+      font-size: 9px;
+      font-weight: 550;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .flat-button:hover { background: #f8f9fb; }
+    .flat-button:disabled { cursor: not-allowed; opacity: .55; }
+    .flat-button-primary { border-color: #2563eb; color: #fff; background: #2563eb; }
+    .flat-button-primary:hover { border-color: #1d4ed8; color: #fff; background: #1d4ed8; }
+    :focus-visible { outline: 2px solid rgba(37, 99, 235, .55); outline-offset: 2px; }
+
+    .billing-section { margin-top: 19px; }
+    .billing-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 10px; }
+    .billing-table th { height: 31px; padding: 0 10px; border-bottom: 1px solid var(--line); color: #707b8c; background: #f8f9fb; font-size: 9px; font-weight: 600; text-align: left; }
+    .billing-table td { height: 35px; padding: 6px 10px; border-bottom: 1px solid #eff1f4; color: #465064; }
+    .billing-table tbody tr:last-child td { border-bottom: 0; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); background: #fff; }
+    .billing-status { color: #526074; }
+    .billing-status.successful { color: #21734b; }
+
+    .action-footer {
+      position: fixed;
+      z-index: 12;
+      right: 0;
+      bottom: 0;
+      left: var(--sidebar-width);
+      display: flex;
+      min-height: 64px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 9px max(28px, calc((100vw - var(--sidebar-width) - 1050px) / 2 + 28px));
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+    .sync-note { display: flex; align-items: center; gap: 7px; color: #707b8c; font-size: 9px; }
+    .sync-note i { color: #6a86bd; }
+    .footer-actions { display: flex; gap: 8px; }
+    .footer-actions .flat-button { min-height: 35px; padding-inline: 12px; font-size: 10px; }
+
+    @media (max-width: 1000px) {
+      :root { --sidebar-width: 64px; }
+      .brand { justify-content: center; padding-inline: 8px; }
+      .brand-wordmark, .nav-label, .sidebar-nav span, .sidebar-footer { display: none; }
+      .sidebar-nav { padding-inline: 8px; }
+      .sidebar-nav a { justify-content: center; padding-inline: 0; }
+      .sidebar-nav i { font-size: 14px; }
+    }
+    @media (max-width: 700px) {
+      :root { --sidebar-width: 0px; }
+      .sidebar { position: sticky; top: 0; width: 100%; height: 51px; flex-direction: row; border-right: 0; border-bottom: 1px solid #1b2742; }
+      .brand { width: 53px; min-height: 50px; flex: 0 0 53px; border-right: 1px solid #1b2742; border-bottom: 0; }
+      .sidebar-nav { display: flex; flex: 1; align-items: center; justify-content: space-around; padding: 0 5px; }
+      .sidebar-nav a { min-width: 34px; min-height: 35px; }
+      .workspace { margin-left: 0; }
+      .topbar { position: relative; min-height: 53px; gap: 8px; padding: 0 12px; }
+      .topbar-right { gap: 8px; }
+      .breadcrumb { font-size: 9px; }
+      .profile-pill > span:last-child { display: none; }
+      main { padding: 19px 12px 120px; }
+      h1 { font-size: 19px; }
+      .summary-bar { align-items: flex-start; flex-direction: column; gap: 8px; }
+      .summary-statuses { justify-content: flex-start; }
+      .field, .field.third { grid-column: 1 / -1; }
+      .section-hint { display: none; }
+      .action-footer { left: 0; flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+      .sync-note { width: 100%; }
+      .footer-actions { width: 100%; }
+      .footer-actions .flat-button { flex: 1; padding-inline: 7px; font-size: 9px; }
+    }
+    @media (max-width: 420px) {
+      .subscription-link { padding-inline: 7px; font-size: 9px; }
+      .breadcrumb span:not(.current) { display: none; }
+      .topbar-right { gap: 5px; }
+      .inline-field { align-items: stretch; flex-direction: column; }
+      .inline-field .verified-badge { align-self: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" aria-label="Workspace navigation">
+    <a class="brand" href="{% url 'home' %}" aria-label="ProCAC home">
+      <img class="brand-mark" src="{% static 'frontend/assets/images/logo/favicon-removebg-preview.png' %}" alt="">
+      <img class="brand-wordmark" src="{% static 'frontend/assets/images/logo/procac-wordmark.png' %}" alt="ProCAC">
+    </a>
+    <div class="nav-label">Workspace</div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" title="Clients"><i class="fa-solid fa-table-list" aria-hidden="true"></i><span>Clients</span></a>
+      <a href="{% url 'intake' %}" title="New intake"><i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>New intake</span></a>
+      <a href="{% url 'agency_profile' %}" aria-current="page" title="Agency profile"><i class="fa-regular fa-building" aria-hidden="true"></i><span>Agency profile</span></a>
+      <a href="{% url 'plans' %}" title="Plans and billing"><i class="fa-regular fa-credit-card" aria-hidden="true"></i><span>Plans &amp; billing</span></a>
+    </nav>
+    <div class="sidebar-footer">Firm settings</div>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <div class="breadcrumb"><span>ProCAC</span> <span aria-hidden="true">/</span> <span>Settings</span> <span aria-hidden="true">/</span> <strong class="current">Agency Profile</strong></div>
+      <div class="topbar-right">
+        <a class="subscription-link" href="{% url 'plans' %}">View Active Subscription <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+        <div class="profile-pill" aria-label="Signed in as {{ request.user.get_full_name|default:request.user.email }}">
+          <span class="profile-avatar" aria-hidden="true">
+            {% if profile.profile_picture %}
+              <img src="{{ profile.profile_picture.url }}" alt="">
+            {% else %}
+              {{ request.user.get_full_name|default:request.user.email|slice:":1"|upper }}
+            {% endif %}
+          </span>
+          <span>{{ request.user.get_full_name|default:request.user.email }}</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">Settings / Firm credentials</div>
+          <h1>Agency profile</h1>
+          <p>Manage your firm details and the defaults used by ProCAC.</p>
+        </div>
+      </div>
+
+      <section class="summary-bar" aria-label="Account summary">
+        <div class="firm-summary">
+          <div class="firm-name">{{ form.firm_name.value|default:"Agency name not set" }}{% if form.accreditation_number.value %} <span aria-hidden="true">·</span> Accreditation ID: {{ form.accreditation_number.value }}{% endif %}</div>
+          <div class="firm-accreditation">Consultant workspace for {{ request.user.get_full_name|default:request.user.email }}</div>
+        </div>
+        <div class="summary-statuses">
+          {% if active_plan %}
+            <span class="status-badge active"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>{{ active_plan }} Plan · Active</span>
+          {% else %}
+            <span class="status-badge inactive"><i class="fa-regular fa-circle" aria-hidden="true"></i>No active subscription</span>
+          {% endif %}
+          <span class="status-badge {% if extension_key_active %}active{% else %}inactive{% endif %}">
+            <i class="fa-solid {% if extension_key_active %}fa-key{% else %}fa-link-slash{% endif %}" aria-hidden="true"></i>
+            {% if extension_key_active %}Extension Key Active{% else %}Extension Key Not Set{% endif %} · v{{ extension_version }}
+          </span>
+        </div>
+      </section>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="notice {% if message.tags == 'error' %}error{% else %}success{% endif %}" role="status">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      {% if form.errors %}
+        <div class="form-errors" role="alert">
+          Correct the details below before saving.
+          <ul>
+            {% for field in form %}
+              {% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'agency_profile' %}" id="profileForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <fieldset class="section">
+          <legend class="section-heading"><span class="section-number">01</span><h2>Firm details</h2><span class="section-hint">Agency contact information</span></legend>
+          <div class="section-body">
+            <div class="field">
+              <label for="{{ form.firm_name.id_for_label }}">Legal practice name</label>
+              {{ form.firm_name }}
+              {% for error in form.firm_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field">
+              <label for="{{ form.accreditation_number.id_for_label }}">CAC accreditation number</label>
+              <div class="inline-field">
+                {{ form.accreditation_number }}
+                <span class="verified-badge neutral"><i class="fa-solid fa-file-circle-check" aria-hidden="true"></i>On file</span>
+              </div>
+              <div class="field-help">Read-only record. Verification status is not recorded in ProCAC.</div>
+            </div>
+            <div class="field">
+              <label for="{{ form.email.id_for_label }}">Primary business email</label>
+              {{ form.email }}
+              {% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field">
+              <label for="{{ form.phone_number.id_for_label }}">Phone number</label>
+              {{ form.phone_number }}
+              {% for error in form.phone_number.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field full">
+              <label for="{{ form.office_address.id_for_label }}">Firm physical address</label>
+              {{ form.office_address }}
+              {% for error in form.office_address.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="section">
+          <legend class="section-heading"><span class="section-number">02</span><h2>Lead consultant / agent</h2><span class="section-hint">Consultant identity</span></legend>
+          <div class="section-body">
+            <div class="field full">
+              <label for="{{ form.profile_picture.id_for_label }}">Profile picture</label>
+              <div class="consultant-avatar-row">
+                {% if profile.profile_picture %}
+                  <img class="consultant-avatar" src="{{ profile.profile_picture.url }}" alt="Current consultant profile picture">
+                {% else %}
+                  <img class="consultant-avatar" src="{% static 'frontend/assets/images/logo/procac.png' %}" alt="Default ProCAC profile picture">
+                {% endif %}
+                <div class="consultant-avatar-copy">
+                  {{ form.profile_picture }}
+                  <div class="field-help">Choose an image file to update your consultant avatar.</div>
+                  {% for error in form.profile_picture.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="{{ form.full_name.id_for_label }}">Full legal name</label>
+              {{ form.full_name }}
+              {% for error in form.full_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field">
+              <label for="{{ form.call_to_bar_number.id_for_label }}">Call-to-Bar / enrollment number</label>
+              {{ form.call_to_bar_number }}
+              {% for error in form.call_to_bar_number.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field full">
+              <span class="field-label">NIN verification status</span>
+              <span class="verified-badge neutral"><i class="fa-regular fa-circle" aria-hidden="true"></i>Not verified</span>
+              <div class="field-help">No consultant NIN verification record is currently stored.</div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="section">
+          <legend class="section-heading"><span class="section-number">03</span><h2>CAC portal integration defaults</h2><span class="section-hint">Presenter values used during autofill</span></legend>
+          <div class="section-body">
+            <div class="field third">
+              <label for="{{ form.presenter_state.id_for_label }}">Default filing state</label>
+              {{ form.presenter_state }}
+              {% for error in form.presenter_state.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field third">
+              <label for="{{ form.presenter_lga.id_for_label }}">Default LGA</label>
+              {{ form.presenter_lga }}
+              {% for error in form.presenter_lga.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field third">
+              <label for="{{ form.presenter_phone.id_for_label }}">Presenter phone</label>
+              {{ form.presenter_phone }}
+              {% for error in form.presenter_phone.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field full">
+              <label for="{{ form.presenter_email.id_for_label }}">Presenter email</label>
+              {{ form.presenter_email }}
+              {% for error in form.presenter_email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <section class="section" aria-labelledby="tokenHeading">
+        <div class="section-heading"><span class="section-number">04</span><h2 id="tokenHeading">Security &amp; API token</h2><span class="section-hint">Private extension authentication</span></div>
+        <div class="section-body">
+          <div class="field full">
+            <label for="extensionToken">ProCAC extension auth key</label>
+            <div class="token-actions">
+              <input
+                class="token-input"
+                id="extensionToken"
+                type="password"
+                value="{{ token_revealed }}"
+                placeholder="{% if extension_key_active %}Key stored · regenerate to replace{% else %}No extension key generated{% endif %}"
+                autocomplete="off"
+                readonly
+                aria-describedby="tokenHelp"
+              >
+              <button class="flat-button" type="button" id="copyToken" {% if not token_revealed %}disabled{% endif %}><i class="fa-regular fa-copy" aria-hidden="true"></i>Copy Key</button>
+              <form method="post" action="{% url 'agency_profile' %}">
+                {% csrf_token %}
+                <button class="flat-button" type="submit" name="action" value="regenerate_token"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>Regenerate Token</button>
+              </form>
+            </div>
+            <div class="token-note" id="tokenHelp" aria-live="polite">
+              {% if token_revealed %}Copy this key into your ProCAC Chrome Extension now. It cannot be retrieved after leaving this page.{% else %}The key is stored as a hash and shown only once when generated. Regenerating it revokes the previous key immediately.{% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="billing-section" aria-labelledby="billingHeading">
+        <div class="section-heading"><span class="section-number">05</span><h2 id="billingHeading">Recent billing activity</h2><span class="section-hint">Latest subscription transactions</span></div>
+        <div class="table-wrap">
+          <table class="billing-table">
+            <thead><tr><th scope="col">Date</th><th scope="col">Reference</th><th scope="col">Plan</th><th scope="col">Amount</th><th scope="col">Status</th></tr></thead>
+            <tbody>
+              {% for payment in recent_payments %}
+                <tr>
+                  <td>{{ payment.date|date:'M j, Y' }}</td>
+                  <td>{{ payment.reference }}</td>
+                  <td>{{ payment.plan }}</td>
+                  <td>{{ payment.currency }} {{ payment.amount_naira|floatformat:0 }}</td>
+                  <td><span class="billing-status {% if payment.status == 'Successful' %}successful{% endif %}">{{ payment.status }}</span></td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5">No payment activity yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="action-footer">
+    <div class="sync-note"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Updates to presenter details here immediately reflect in your Chrome Extension's auto-fill payloads.</div>
+    <div class="footer-actions">
+      <a class="flat-button" href="{% url 'agency_profile' %}">Discard Changes</a>
+      <button class="flat-button flat-button-primary" type="submit" form="profileForm"><i class="fa-solid fa-check" aria-hidden="true"></i>Update Profile &amp; Sync Extension</button>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('copyToken').addEventListener('click', async () => {
+      const tokenInput = document.getElementById('extensionToken');
+      const tokenHelp = document.getElementById('tokenHelp');
+      try {
+        await navigator.clipboard.writeText(tokenInput.value);
+        tokenHelp.textContent = 'Key copied. Paste it into the ProCAC Chrome Extension settings.';
+      } catch {
+        tokenInput.type = 'text';
+        tokenInput.select();
+        tokenHelp.textContent = 'Select and copy the key, then paste it into the ProCAC Chrome Extension settings.';
+      }
+    });
+  </script>
+</body>
+</html>

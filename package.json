@@ -1,0 +1,16 @@
+{
+  "name": "webapp_cac",
+  "version": "1.0.0",
+  "description": "CAC AutoFill Pro",
+  "main": "index.js",
+  "scripts": {
+    "sass:build": "sass frontend/static/frontend/src/scss/main.scss frontend/static/frontend/assets/css/main.css --load-path=node_modules",
+    "sass:watch": "sass --watch frontend/static/frontend/src/scss/main.scss:frontend/static/frontend/assets/css/main.css --load-path=node_modules"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.3"
+  },
+  "devDependencies": {
+    "sass": "^1.77.0"
+  }
+}

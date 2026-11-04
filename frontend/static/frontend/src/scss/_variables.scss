@@ -1,0 +1,70 @@
+// ==========================================================================
+// ProCAC brand colors
+// ==========================================================================
+
+// --------------------------------------------------------------------------
+// 1. Color Palette Definitions
+// --------------------------------------------------------------------------
+
+// Dark Blue Tones (Headers, Sidebars, Primary CTAs, Active States)
+$dark-blue-900: #15344b;
+$dark-blue-800: #1f5c78;
+$dark-blue-700: #147d73;
+$dark-blue-600: #0b625a;
+
+// Meek Tones (Backgrounds, Card Surfaces, Borders, Muted Text)
+$meek-bg:       #f4f6f2;
+$meek-card:     #ffffff;
+$meek-border:   #dce5e0;
+$meek-hover:    #e5f2ee;
+$meek-text-muted: #64757c;
+
+// Status Indicator Colors
+$cac-success:   #147d73;
+$cac-warning:   #c59a48;
+$cac-danger:    #ef4444; // CAC Portal Down / Errors (Rose)
+
+// --------------------------------------------------------------------------
+// 2. Bootstrap 6 Variable Overrides
+// --------------------------------------------------------------------------
+
+// Re-bind Bootstrap Core System Colors
+$primary:       $dark-blue-800;
+$secondary:     $meek-text-muted;
+$success:       $cac-success;
+$warning:       $cac-warning;
+$danger:        $cac-danger;
+$dark:          $dark-blue-900;
+$light:         $meek-bg;
+
+// Global Page Body Setup
+$body-bg:       $meek-bg;
+$body-color:    #1e293b;
+$font-family-sans-serif: 'Inter', system-ui, -apple-system, sans-serif;
+
+// Typography & Headings
+$headings-font-weight: 700;
+$headings-color:       $dark-blue-900;
+
+// Components Customization
+$border-radius:        0.5rem; // Clean 8px rounded corners
+$border-radius-lg:     0.75rem; // 12px for modern cards/modals
+$border-color:         $meek-border;
+
+// Buttons
+$btn-font-weight:      600;
+$btn-padding-y:        0.625rem;
+$btn-padding-x:        1.25rem;
+$btn-border-radius:    $border-radius;
+
+// Cards
+$card-bg:              $meek-card;
+$card-border-color:    $meek-border;
+$card-border-radius:   $border-radius-lg;
+$card-cap-bg:          transparent;
+
+// Form Inputs
+$input-bg:             #ffffff;
+$input-border-color:   $meek-border;
+$input-focus-border-color: $dark-blue-600;
+$input-focus-box-shadow:   0 0 0 0.25rem rgba(50, 161, 154, 0.2);

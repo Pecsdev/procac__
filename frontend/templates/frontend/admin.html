@@ -1,0 +1,499 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% include "frontend/favicon.html" %}
+    <title>Super Admin Dashboard | ProCAC SaaS</title>
+    <meta
+      name="description"
+      content="ProCAC platform administration and subscription analytics dashboard."
+    />
+
+    <!-- Official Bootstrap 5.3 CSS CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'frontend/assets/css/theme.css' %}"
+    />
+    <script
+      src="{% static 'frontend/assets/js/encoded-links.js' %}"
+      defer
+    ></script>
+  </head>
+  <body
+    class="admin-page"
+    style="
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family:
+        system-ui,
+        -apple-system,
+        sans-serif;
+    "
+  >
+    <!-- ========================================================================== -->
+    <!-- ADMIN NAVIGATION HEADER -->
+    <!-- ========================================================================== -->
+    <nav
+      class="navbar navbar-expand-lg navbar-dark py-3"
+      style="
+        background-color: #1e293b;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      "
+    >
+      <div class="container-fluid px-4">
+        <a
+          class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold"
+          href="#"
+        >
+          <img
+            src="{% static 'frontend/assets/images/hero/procac-high-resolution-logo.png' %}"
+            alt="Logo"
+            style="height: 32px; width: auto"
+          />
+          <span
+            >Pro<span style="color: #60a5fa">CAC</span>
+            <span class="badge bg-danger ms-2" style="font-size: 0.65rem"
+              >SUPER ADMIN</span
+            ></span
+          >
+        </a>
+
+        <div class="d-flex align-items-center gap-3">
+          <span class="small text-slate-400" style="color: #94a3b8"
+            ><i
+              class="fa-solid fa-circle text-success me-1"
+              style="font-size: 0.5rem"
+            ></i>
+            System Live</span
+          >
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-light btn-sm px-3">
+              Logout Admin
+            </button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ========================================================================== -->
+    <!-- MAIN ADMIN CONTENT AREA -->
+    <!-- ========================================================================== -->
+    <div class="container-fluid px-4 py-4">
+      <!-- Page Header -->
+      <div
+        class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom"
+        style="border-color: #334155 !important"
+      >
+        <div>
+          <h2 class="fw-bold text-white mb-1">
+            Subscription & Revenue Analytics
+          </h2>
+          <p class="small mb-0" style="color: #94a3b8">
+            Real-time tracking of active consultants and plan subscriber counts
+            across Nigeria.
+          </p>
+        </div>
+        <div class="mt-3 mt-md-0">
+          <button
+            class="btn btn-primary btn-sm px-3 py-2 fw-semibold"
+            onclick="location.reload()"
+          >
+            <i class="fa-solid fa-rotate me-1"></i> Refresh Data
+          </button>
+        </div>
+      </div>
+
+      <!-- 1. HIGH-LEVEL METRICS CARDS -->
+      <div class="row g-4 mb-4">
+        <!-- Total Revenue -->
+        <div class="col-xl-3 col-md-6">
+          <div
+            class="card border-0 p-4 rounded-4 shadow-sm"
+            style="
+              background-color: #1e293b;
+              border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            "
+          >
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span
+                class="small fw-semibold text-uppercase"
+                style="color: #94a3b8; font-size: 0.75rem"
+                >Total Estimated MRR</span
+              >
+              <div class="bg-success bg-opacity-10 text-success p-2 rounded-3">
+                <i class="fa-solid fa-naira-sign fa-lg"></i>
+              </div>
+            </div>
+            <h3 class="fw-bold text-white mb-1">₦8,450,000</h3>
+            <small class="text-success"
+              ><i class="fa-solid fa-arrow-trend-up me-1"></i> +18.4% this
+              month</small
+            >
+          </div>
+        </div>
+
+        <!-- Total Active Consultants -->
+        <div class="col-xl-3 col-md-6">
+          <div
+            class="card border-0 p-4 rounded-4 shadow-sm"
+            style="
+              background-color: #1e293b;
+              border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            "
+          >
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span
+                class="small fw-semibold text-uppercase"
+                style="color: #94a3b8; font-size: 0.75rem"
+                >Total Consultants</span
+              >
+              <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-3">
+                <i class="fa-solid fa-users fa-lg"></i>
+              </div>
+            </div>
+            <h3 class="fw-bold text-white mb-1">1,420</h3>
+            <small class="text-success"
+              ><i class="fa-solid fa-arrow-trend-up me-1"></i> 94 new this
+              week</small
+            >
+          </div>
+        </div>
+
+        <!-- Total Filings Automated -->
+        <div class="col-xl-3 col-md-6">
+          <div
+            class="card border-0 p-4 rounded-4 shadow-sm"
+            style="
+              background-color: #1e293b;
+              border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            "
+          >
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span
+                class="small fw-semibold text-uppercase"
+                style="color: #94a3b8; font-size: 0.75rem"
+                >Total CAC Filings</span
+              >
+              <div class="bg-info bg-opacity-10 text-info p-2 rounded-3">
+                <i class="fa-solid fa-file-shield fa-lg"></i>
+              </div>
+            </div>
+            <h3 class="fw-bold text-white mb-1">6,890</h3>
+            <small style="color: #94a3b8">Across BN, LTD & IT portals</small>
+          </div>
+        </div>
+
+        <!-- Portal Status -->
+        <div class="col-xl-3 col-md-6">
+          <div
+            class="card border-0 p-4 rounded-4 shadow-sm"
+            style="
+              background-color: #1e293b;
+              border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            "
+          >
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span
+                class="small fw-semibold text-uppercase"
+                style="color: #94a3b8; font-size: 0.75rem"
+                >CAC CRP Status</span
+              >
+              <div class="bg-warning bg-opacity-10 text-warning p-2 rounded-3">
+                <i class="fa-solid fa-server fa-lg"></i>
+              </div>
+            </div>
+            <h3 class="fw-bold text-white mb-1">Operational</h3>
+            <small class="text-success"
+              ><i class="fa-solid fa-check me-1"></i> Extension API
+              healthy</small
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. PLAN SUBSCRIBER BREAKDOWN (Detailed Cards) -->
+      <div class="row g-4 mb-4">
+        <div class="col-12">
+          <div
+            class="card border-0 p-4 rounded-4 shadow-sm"
+            style="
+              background-color: #1e293b;
+              border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            "
+          >
+            <h4 class="fw-bold text-white mb-4">
+              Subscription Breakdown by Pricing Tier
+            </h4>
+
+            <div class="row g-4">
+              <!-- Tier 1: Starter Plan -->
+              <div class="col-lg-3 col-md-6">
+                <div
+                  class="p-3 rounded-3 border"
+                  style="
+                    background-color: #0f172a;
+                    border-color: #334155 !important;
+                  "
+                >
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="badge bg-secondary">Starter Plan</span>
+                    <span class="small text-muted font-monospace"
+                      >₦500 / day</span
+                    >
+                  </div>
+                  <h2 class="fw-bold text-white mb-1">
+                    500 <span class="fs-6 fw-normal text-muted">users</span>
+                  </h2>
+                  <p class="small mb-3" style="color: #94a3b8">
+                    Active Daily Pass Subscribers
+                  </p>
+                  <div
+                    class="progress"
+                    style="height: 6px; background-color: #334155"
+                  >
+                    <div
+                      class="progress-bar bg-primary"
+                      role="progressbar"
+                      style="width: 35%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tier 2: Standard Plan -->
+              <div class="col-lg-3 col-md-6">
+                <div
+                  class="p-3 rounded-3 border"
+                  style="
+                    background-color: #0f172a;
+                    border-color: #334155 !important;
+                  "
+                >
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="badge bg-info text-dark">Standard Plan</span>
+                    <span class="small text-muted font-monospace"
+                      >₦3,000 / wk</span
+                    >
+                  </div>
+                  <h2 class="fw-bold text-white mb-1">
+                    340 <span class="fs-6 fw-normal text-muted">users</span>
+                  </h2>
+                  <p class="small mb-3" style="color: #94a3b8">
+                    Active Weekly Subscribers
+                  </p>
+                  <div
+                    class="progress"
+                    style="height: 6px; background-color: #334155"
+                  >
+                    <div
+                      class="progress-bar bg-info"
+                      role="progressbar"
+                      style="width: 24%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tier 3: Premium Plan -->
+              <div class="col-lg-3 col-md-6">
+                <div
+                  class="p-3 rounded-3 border border-primary"
+                  style="background-color: #0f172a"
+                >
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="badge bg-primary">Premium Plan</span>
+                    <span class="small text-muted font-monospace"
+                      >₦10,000 / mo</span
+                    >
+                  </div>
+                  <h2 class="fw-bold text-white mb-1">
+                    420 <span class="fs-6 fw-normal text-muted">users</span>
+                  </h2>
+                  <p class="small mb-3" style="color: #94a3b8">
+                    Active Monthly Subscribers
+                  </p>
+                  <div
+                    class="progress"
+                    style="height: 6px; background-color: #334155"
+                  >
+                    <div
+                      class="progress-bar bg-primary"
+                      role="progressbar"
+                      style="width: 30%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tier 4: Enterprise Plan -->
+              <div class="col-lg-3 col-md-6">
+                <div
+                  class="p-3 rounded-3 border"
+                  style="
+                    background-color: #0f172a;
+                    border-color: #334155 !important;
+                  "
+                >
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="badge bg-success">Enterprise</span>
+                    <span class="small text-muted font-monospace"
+                      >₦10,000 / mo</span
+                    >
+                  </div>
+                  <h2 class="fw-bold text-white mb-1">
+                    160 <span class="fs-6 fw-normal text-muted">firms</span>
+                  </h2>
+                  <p class="small mb-3" style="color: #94a3b8">
+                    Law Firms & Agencies
+                  </p>
+                  <div
+                    class="progress"
+                    style="height: 6px; background-color: #334155"
+                  >
+                    <div
+                      class="progress-bar bg-success"
+                      role="progressbar"
+                      style="width: 11%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. RECENT CONSULTANT REGISTRATIONS TABLE -->
+      <div
+        class="card border-0 p-4 rounded-4 shadow-sm"
+        style="
+          background-color: #1e293b;
+          border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        "
+      >
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-white mb-0">
+            Recent Consultant Registrations
+          </h5>
+          <input
+            type="text"
+            class="form-control form-control-sm bg-dark text-white border-secondary"
+            placeholder="Search consultant..."
+            style="width: 250px; border-color: #334155 !important"
+          />
+        </div>
+
+        <div class="table-responsive">
+          <table
+            class="table table-dark table-hover align-middle mb-0"
+            style="background-color: transparent"
+          >
+            <thead
+              class="text-slate-400 small text-uppercase"
+              style="
+                background-color: #0f172a;
+                color: #94a3b8;
+                font-size: 0.7rem;
+              "
+            >
+              <tr>
+                <th class="py-3 px-3">Consultant / Law Firm</th>
+                <th class="py-3">Accreditation ID</th>
+                <th class="py-3">Selected Plan</th>
+                <th class="py-3">Date Subscribed</th>
+                <th class="py-3 text-end px-3">Status</th>
+              </tr>
+            </thead>
+            <tbody class="small" style="border-color: #334155 !important">
+              <tr>
+                <td class="px-3 fw-semibold text-white">
+                  Barr. Chinedu Okafor & Co.
+                </td>
+                <td class="font-monospace text-muted">NBA/ACC/2026/410</td>
+                <td>
+                  <span class="badge bg-primary">Premium Plan (₦10k)</span>
+                </td>
+                <td class="text-muted">Today, 2:14 PM</td>
+                <td class="text-end px-3">
+                  <span
+                    class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25"
+                    >Active</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td class="px-3 fw-semibold text-white">
+                  Amina Yusuf Law Chambers
+                </td>
+                <td class="font-monospace text-muted">NBA/ACC/2026/389</td>
+                <td><span class="badge bg-success">Enterprise (₦35k)</span></td>
+                <td class="text-muted">Yesterday, 11:45 AM</td>
+                <td class="text-end px-3">
+                  <span
+                    class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25"
+                    >Active</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td class="px-3 fw-semibold text-white">
+                  Oluwaseun & Partners
+                </td>
+                <td class="font-monospace text-muted">NBA/ACC/2026/312</td>
+                <td>
+                  <span class="badge bg-info text-dark"
+                    >Standard Plan (₦3k)</span
+                  >
+                </td>
+                <td class="text-muted">2 days ago</td>
+                <td class="text-end px-3">
+                  <span
+                    class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25"
+                    >Active</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td class="px-3 fw-semibold text-white">Tunde Bakare Legal</td>
+                <td class="font-monospace text-muted">NBA/ACC/2026/295</td>
+                <td>
+                  <span class="badge bg-secondary">Starter Plan (₦500)</span>
+                </td>
+                <td class="text-muted">3 days ago</td>
+                <td class="text-end px-3">
+                  <span
+                    class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25"
+                    >Expired</span
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,735 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include "frontend/favicon.html" %}
+  <title>New Client Intake | ProCAC</title>
+  <meta name="description" content="Create a client record and prepare a CAC filing payload in ProCAC.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --surface: #fff;
+      --canvas: #f7f8fa;
+      --blue: #2563eb;
+      --sidebar: #0b1329;
+      --sidebar-width: 232px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    a { color: inherit; }
+
+    .sidebar {
+      position: fixed;
+      z-index: 20;
+      inset: 0 auto 0 0;
+      display: flex;
+      width: var(--sidebar-width);
+      flex-direction: column;
+      border-right: 1px solid #1b2742;
+      color: #cbd5e1;
+      background: var(--sidebar);
+    }
+
+    .brand {
+      display: flex;
+      min-height: 66px;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      border-bottom: 1px solid #1b2742;
+      text-decoration: none;
+    }
+
+    .brand-mark { width: 29px; height: 29px; object-fit: contain; }
+    .brand-wordmark { width: 112px; height: auto; filter: brightness(0) invert(1); }
+    .nav-label { padding: 18px 18px 7px; color: #8290a9; font-size: 9px; font-weight: 650; letter-spacing: .11em; text-transform: uppercase; }
+    .sidebar-nav { display: grid; gap: 3px; padding: 0 9px; }
+    .sidebar-nav a {
+      display: flex;
+      min-height: 36px;
+      align-items: center;
+      gap: 11px;
+      padding: 0 10px;
+      border-radius: 4px;
+      color: #aab5c8;
+      font-size: 11px;
+      text-decoration: none;
+    }
+    .sidebar-nav a:hover { color: #fff; background: #17233c; }
+    .sidebar-nav a[aria-current="page"] { color: #fff; background: #172c52; }
+    .sidebar-nav i { width: 15px; color: #8da1c3; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding: 13px 18px; border-top: 1px solid #1b2742; color: #8997ae; font-size: 10px; }
+
+    .workspace { min-height: 100vh; margin-left: var(--sidebar-width); }
+    .topbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .97);
+    }
+    .breadcrumb { color: #7b8494; font-size: 11px; }
+    .breadcrumb strong { color: #263043; font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 15px; }
+    .back-link {
+      display: inline-flex;
+      min-height: 31px;
+      align-items: center;
+      gap: 6px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      color: #374151;
+      background: #fff;
+      font-size: 10px;
+      font-weight: 550;
+      text-decoration: none;
+    }
+    .back-link:hover { border-color: #c5ccd6; background: #f8fafc; }
+    .profile-pill { display: flex; align-items: center; gap: 8px; color: #374151; font-size: 10px; font-weight: 550; }
+    .profile-avatar {
+      display: grid;
+      width: 27px;
+      height: 27px;
+      place-items: center;
+      border: 1px solid #dfe4eb;
+      border-radius: 50%;
+      color: #475569;
+      background: #f4f6f9;
+      font-size: 9px;
+      font-weight: 650;
+    }
+
+    main { width: min(1050px, 100%); margin: 0 auto; padding: 26px 28px 112px; }
+    .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+    .eyebrow { margin-bottom: 4px; color: #64748b; font-size: 9px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0 0 4px; color: var(--ink); font-size: 21px; font-weight: 650; letter-spacing: -.035em; line-height: 1.2; }
+    .page-heading p { margin: 0; color: var(--muted); font-size: 11px; }
+    .record-label { align-self: center; padding: 5px 8px; border: 1px solid var(--line); color: #64748b; background: #fff; font-size: 9px; white-space: nowrap; }
+
+    .notice {
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      border: 1px solid #c9d8f6;
+      color: #34425b;
+      background: #f4f7fd;
+      font-size: 11px;
+    }
+    .notice.error { border-color: #efc7c3; color: #8f2821; background: #fff7f6; }
+    .form-errors { margin: 0 0 12px; padding: 9px 12px; border: 1px solid #efc7c3; color: #8f2821; background: #fff7f6; font-size: 11px; }
+    .form-errors ul { margin: 4px 0 0; padding-left: 18px; }
+
+    form { margin: 0; }
+    .registration-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .registration-title { color: #30394a; font-size: 10px; font-weight: 600; white-space: nowrap; }
+    .registration-tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); background: #f6f7f9; }
+    .registration-tabs button {
+      min-height: 30px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      color: #667085;
+      background: transparent;
+      font-size: 10px;
+      font-weight: 550;
+      cursor: pointer;
+    }
+    .registration-tabs button[aria-pressed="true"] { border-color: #d7dce5; color: #172033; background: #fff; }
+    .allocations { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; color: #697386; font-size: 9px; white-space: nowrap; }
+    .allocation { padding: 4px 6px; border: 1px solid #edf0f3; background: #fafbfc; }
+    .allocation strong { color: #3c4658; font-weight: 650; }
+
+    .section {
+      margin: 0 0 12px;
+      padding: 0;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      min-width: 0;
+    }
+    .section-heading {
+      display: flex;
+      min-height: 38px;
+      align-items: center;
+      gap: 9px;
+      padding: 0 13px;
+      border-bottom: 1px solid var(--line);
+      background: #f8f9fb;
+    }
+    .section > legend { float: none; width: 100%; margin: 0; padding: 0; }
+    .section-number { color: #778194; font-size: 9px; font-weight: 650; font-variant-numeric: tabular-nums; }
+    .section-heading h2 { margin: 0; color: #252d3b; font-size: 11px; font-weight: 600; }
+    .section-hint { margin-left: auto; color: #8992a1; font-size: 9px; }
+    .section-body { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; padding: 13px; }
+    .field { grid-column: span 6; min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .field.third { grid-column: span 4; }
+    .field label, .field-label { display: block; margin-bottom: 5px; color: #465064; font-size: 10px; font-weight: 550; }
+    .required-mark { color: #b42318; }
+    .field input, .field select, .field textarea {
+      display: block;
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 9px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      outline: 0;
+      color: #0f172a;
+      background: #fff;
+      font-size: 11px;
+      line-height: 1.4;
+      transition: border-color .12s ease;
+    }
+    .field textarea { min-height: 72px; resize: vertical; }
+    .field input::placeholder, .field textarea::placeholder { color: #a0a8b5; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #2563eb; }
+    .field-help { margin-top: 4px; color: #8992a1; font-size: 9px; }
+    .field-error { margin-top: 4px; color: #b42318; font-size: 9px; }
+    .input-action { display: flex; gap: 7px; }
+    .input-action input { min-width: 0; flex: 1; }
+    .validate-button {
+      min-height: 34px;
+      padding: 0 9px;
+      border: 1px solid #d7dfe9;
+      border-radius: 5px;
+      color: #384457;
+      background: #fff;
+      font-size: 9px;
+      font-weight: 550;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .validate-button:hover { border-color: #aab8cd; background: #f8fafc; }
+    .nin-result { min-height: 13px; margin-top: 4px; color: #667085; font-size: 9px; }
+    .nin-result.valid { color: #18764b; }
+    .nin-result.invalid { color: #b42318; }
+
+    .table-wrap { grid-column: 1 / -1; overflow-x: auto; border: 1px solid #e9edf2; }
+    .stakeholder-table { width: 100%; min-width: 560px; border-collapse: collapse; text-align: left; }
+    .stakeholder-table th { height: 30px; padding: 0 8px; border-bottom: 1px solid #e9edf2; color: #707b8c; background: #f8f9fb; font-size: 9px; font-weight: 600; }
+    .stakeholder-table td { padding: 6px 7px; border-bottom: 1px solid #eff1f4; }
+    .stakeholder-table tbody tr:last-child td { border-bottom: 0; }
+    .stakeholder-table input { width: 100%; min-width: 100px; height: 30px; padding: 5px 7px; border: 1px solid #e2e8f0; border-radius: 5px; outline: 0; font-size: 10px; }
+    .stakeholder-table input:focus { border-color: #2563eb; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+    .remove-row { border: 0; color: #8a94a4; background: transparent; cursor: pointer; }
+    .remove-row:hover { color: #b42318; }
+    .table-tools { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .table-note { color: #818b9b; font-size: 9px; }
+    .add-row {
+      min-height: 29px;
+      padding: 0 9px;
+      border: 1px solid #dce2e9;
+      border-radius: 5px;
+      color: #42506a;
+      background: #fff;
+      font-size: 9px;
+      font-weight: 550;
+      cursor: pointer;
+    }
+    .add-row:hover { border-color: #b8c2d0; background: #f8fafc; }
+
+    .action-footer {
+      position: fixed;
+      z-index: 12;
+      right: 0;
+      bottom: 0;
+      left: var(--sidebar-width);
+      display: flex;
+      min-height: 65px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px max(28px, calc((100vw - var(--sidebar-width) - 1050px) / 2 + 28px));
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+    .sync-note { display: flex; align-items: center; gap: 7px; color: #707b8c; font-size: 9px; }
+    .sync-note i { color: #6a86bd; }
+    .actions { display: flex; gap: 8px; }
+    .button {
+      display: inline-flex;
+      min-height: 35px;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 12px;
+      border: 1px solid #dce2e9;
+      border-radius: 5px;
+      color: #3e4859;
+      background: #fff;
+      font-size: 10px;
+      font-weight: 550;
+      cursor: pointer;
+    }
+    .button:hover { background: #f8f9fb; }
+    .button-primary { border-color: #2563eb; color: #fff; background: #2563eb; }
+    .button-primary:hover { border-color: #1d4ed8; background: #1d4ed8; }
+    :focus-visible { outline: 2px solid rgba(37, 99, 235, .55); outline-offset: 2px; }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 1000px) {
+      :root { --sidebar-width: 64px; }
+      .brand { justify-content: center; padding-inline: 8px; }
+      .brand-wordmark, .nav-label, .sidebar-nav span, .sidebar-footer { display: none; }
+      .sidebar-nav { padding-inline: 8px; }
+      .sidebar-nav a { justify-content: center; padding-inline: 0; }
+      .sidebar-nav i { font-size: 14px; }
+    }
+    @media (max-width: 700px) {
+      :root { --sidebar-width: 0px; }
+      .sidebar { position: sticky; top: 0; width: 100%; height: 51px; flex-direction: row; border-right: 0; border-bottom: 1px solid #1b2742; }
+      .brand { width: 53px; min-height: 50px; flex: 0 0 53px; border-right: 1px solid #1b2742; border-bottom: 0; }
+      .sidebar-nav { display: flex; flex: 1; align-items: center; justify-content: space-around; padding: 0 5px; }
+      .sidebar-nav a { min-width: 34px; min-height: 35px; }
+      .workspace { margin-left: 0; }
+      .topbar { position: relative; min-height: 53px; gap: 8px; padding: 0 12px; }
+      .topbar-right { gap: 8px; }
+      .breadcrumb { font-size: 9px; }
+      .profile-pill > span:last-child { display: none; }
+      main { padding: 20px 12px 120px; }
+      .page-heading { margin-bottom: 15px; }
+      h1 { font-size: 19px; }
+      .registration-bar { align-items: flex-start; flex-direction: column; }
+      .registration-tabs { width: 100%; }
+      .registration-tabs button { flex: 1; padding-inline: 4px; font-size: 9px; }
+      .allocations { justify-content: flex-start; }
+      .field, .field.third { grid-column: 1 / -1; }
+      .section-hint { display: none; }
+      .action-footer { left: 0; flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+      .sync-note { width: 100%; }
+      .actions { width: 100%; }
+      .actions .button { flex: 1; padding-inline: 7px; font-size: 9px; }
+    }
+    @media (max-width: 420px) {
+      .back-link { padding-inline: 7px; font-size: 9px; }
+      .breadcrumb span:not(.current) { display: none; }
+      .record-label { display: none; }
+      .actions { gap: 5px; }
+      .actions .button { gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" aria-label="Workspace navigation">
+    <a class="brand" href="{% url 'home' %}" aria-label="ProCAC home">
+      <img class="brand-mark" src="{% static 'frontend/assets/images/logo/favicon-removebg-preview.png' %}" alt="">
+      <img class="brand-wordmark" src="{% static 'frontend/assets/images/logo/procac-wordmark.png' %}" alt="ProCAC">
+    </a>
+    <div class="nav-label">Workspace</div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" title="Clients"><i class="fa-solid fa-table-list" aria-hidden="true"></i><span>Clients</span></a>
+      <a href="{% url 'intake' %}" aria-current="page" title="New client intake"><i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>New intake</span></a>
+      <a href="{% url 'agency_profile' %}" title="Agency profile"><i class="fa-regular fa-building" aria-hidden="true"></i><span>Agency profile</span></a>
+      <a href="{% url 'plans' %}" title="Plans and billing"><i class="fa-regular fa-credit-card" aria-hidden="true"></i><span>Plans &amp; billing</span></a>
+    </nav>
+    <div class="sidebar-footer">Client Registry</div>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <div class="breadcrumb"><span>ProCAC</span> <span aria-hidden="true">/</span> <span>Client Registry</span> <span aria-hidden="true">/</span> <strong class="current">New Client Intake</strong></div>
+      <div class="topbar-right">
+        <a class="back-link" href="{% url 'dashboard' %}"><span aria-hidden="true">←</span> Back to Dashboard</a>
+        <div class="profile-pill" aria-label="Signed in as {{ request.user.get_full_name|default:request.user.email }}">
+          <span class="profile-avatar" aria-hidden="true">{{ request.user.get_full_name|default:request.user.email|slice:":1"|upper }}</span>
+          <span>{{ request.user.get_full_name|default:request.user.email }}</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">Client Registry / Filing Setup</div>
+          <h1>New client intake</h1>
+          <p>Capture the client details required to prepare a CAC filing.</p>
+        </div>
+        <span class="record-label">NEW RECORD</span>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="notice{% if message.tags == 'error' %} error{% endif %}" role="status">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      {% if form.errors %}
+        <div class="form-errors" role="alert">
+          Review the highlighted details before continuing.
+          <ul>
+            {% for field in form %}
+              {% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <form method="post" id="intakeForm">
+        {% csrf_token %}
+        {% if form.instance.pk %}<input type="hidden" name="draft_id" value="{{ form.instance.pk }}">{% endif %}
+        <input type="hidden" name="entity_type" id="id_entity_type" value="{{ form.entity_type.value|default:'BN' }}">
+        <input type="hidden" name="entity_name" id="id_entity_name" value="{{ form.entity_name.value|default:'' }}">
+        <input type="hidden" name="directors_json" id="id_directors_json" value="{{ form.directors_json.value|default:'' }}">
+
+        <section class="registration-bar" aria-labelledby="registrationTypeLabel">
+          <div class="registration-title" id="registrationTypeLabel">Registration type</div>
+          <div class="registration-tabs" role="group" aria-label="Choose registration type">
+            <button type="button" data-type="BN" aria-pressed="true">Business Name <span>(BN)</span></button>
+            <button type="button" data-type="LTD" aria-pressed="false">Private Limited <span>(LTD)</span></button>
+            <button type="button" data-type="IT" aria-pressed="false">Incorporated Trustees <span>(IT)</span></button>
+          </div>
+          <div class="allocations" aria-label="Plan allocations used">
+            <span class="allocation"><strong>BN:</strong> {{ business_name_count }}{% if entity_profile_capacities.BN %}/{{ entity_profile_capacities.BN }} used{% else %} used · plan pool{% endif %}</span>
+            <span class="allocation"><strong>LTD:</strong> {{ limited_company_count }}{% if entity_profile_capacities.LTD %}/{{ entity_profile_capacities.LTD }} used{% else %} used · plan pool{% endif %}</span>
+            <span class="allocation"><strong>IT:</strong> {{ incorporated_trustee_count }}{% if entity_profile_capacities.IT %}/{{ entity_profile_capacities.IT }} used{% else %} used · plan pool{% endif %}</span>
+          </div>
+        </section>
+
+        <fieldset class="section">
+          <legend class="section-heading"><span class="section-number">01</span><h2>Entity &amp; proposed names</h2><span class="section-hint">Name reservation details</span></legend>
+          <div class="section-body">
+            <div class="field">
+              <label for="proposed_name_1">Option 1 <span class="required-mark">*</span></label>
+              <input id="proposed_name_1" name="proposed_name_1" type="text" maxlength="255" value="{{ form.proposed_name_1.value|default:'' }}" placeholder="e.g. Northstar Logistics Limited" autocomplete="organization" required>
+              {% for error in form.proposed_name_1.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field">
+              <label for="proposed_name_2">Option 2</label>
+              <input id="proposed_name_2" name="proposed_name_2" type="text" maxlength="255" value="{{ form.proposed_name_2.value|default:'' }}" placeholder="Alternative name, if available">
+              {% for error in form.proposed_name_2.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field full">
+              <label for="specific_nature">General nature of business / aims</label>
+              <input id="specific_nature" name="specific_nature" type="text" maxlength="255" value="{{ form.specific_nature.value|default:'' }}" placeholder="Briefly describe the entity's activities or purpose">
+              {% for error in form.specific_nature.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="section">
+          <legend class="section-heading"><span class="section-number">02</span><h2>Primary applicant / proprietor / director</h2><span class="section-hint">Primary contact</span></legend>
+          <div class="section-body">
+            <div class="field">
+              <label for="primary_full_name">Full name <span class="required-mark">*</span></label>
+              <input id="primary_full_name" type="text" placeholder="As shown on identity document" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="email">Email address <span class="required-mark">*</span></label>
+              <input id="email" name="email" type="email" maxlength="254" value="{{ form.email.value|default:'' }}" placeholder="name@example.com" autocomplete="email" required>
+              {% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field third">
+              <label for="phone">Phone number <span class="required-mark">*</span></label>
+              <input id="phone" name="phone" type="tel" maxlength="30" value="{{ form.phone.value|default:'' }}" placeholder="+234 801 234 5678" autocomplete="tel" required>
+              {% for error in form.phone.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field third">
+              <label for="gender">Gender <span class="required-mark">*</span></label>
+              <select id="gender" required>
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div class="field third">
+              <label for="state">State</label>
+              <input id="state" name="state" type="text" maxlength="100" value="{{ form.state.value|default:'' }}" placeholder="e.g. Lagos">
+            </div>
+            <div class="field full">
+              <label for="street_address">Residential address <span class="required-mark">*</span></label>
+              <input id="street_address" name="street_address" type="text" maxlength="255" value="{{ form.street_address.value|default:'' }}" placeholder="Street address and city" autocomplete="street-address" required>
+              {% for error in form.street_address.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field third">
+              <label for="city">City</label>
+              <input id="city" name="city" type="text" maxlength="100" value="{{ form.city.value|default:'' }}" placeholder="City">
+            </div>
+            <div class="field third">
+              <label for="lga">Local government area</label>
+              <input id="lga" name="lga" type="text" maxlength="100" value="{{ form.lga.value|default:'' }}" placeholder="LGA">
+            </div>
+            <div class="field third">
+              <label for="commencement_date">Commencement date</label>
+              <input id="commencement_date" name="commencement_date" type="date" value="{{ form.commencement_date.value|default:'' }}">
+              {% for error in form.commencement_date.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="section">
+          <legend class="section-heading"><span class="section-number">03</span><h2>Identity verification</h2><span class="section-hint">11-digit National Identification Number</span></legend>
+          <div class="section-body">
+            <div class="field full">
+              <label for="nin">NIN number</label>
+              <div class="input-action">
+                <input id="nin" name="nin" type="text" inputmode="numeric" autocomplete="off" maxlength="11" pattern="[0-9]{11}" value="{{ form.nin.value|default:'' }}" placeholder="Enter 11 digits">
+                <button class="validate-button" type="button" id="validateNin">Validate NIN Format</button>
+              </div>
+              <div class="nin-result" id="ninResult" aria-live="polite"></div>
+              {% for error in form.nin.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="section" id="ltdFields" hidden>
+          <legend class="section-heading"><span class="section-number">04</span><h2>Share capital &amp; directors / PSCs</h2><span class="section-hint">Ownership allocation</span></legend>
+          <div class="section-body">
+            <div class="field full">
+              <span class="field-label">Share capital split (%)</span>
+              <div class="table-wrap">
+                <table class="stakeholder-table">
+                  <thead><tr><th scope="col">Director / PSC name</th><th scope="col">Share allocation (%)</th><th scope="col">Designation</th><th scope="col"><span class="visually-hidden">Remove</span></th></tr></thead>
+                  <tbody id="ltdRows">
+                    <tr>
+                      <td><span id="primaryShareName">Primary applicant</span></td>
+                      <td><input id="primary_share_allocation" type="number" min="0" max="100" step="0.01" placeholder="0–100" aria-label="Primary applicant share allocation percentage"></td>
+                      <td>Primary applicant</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-tools">
+                <span class="table-note">Include the primary applicant and each additional director or person with significant control.</span>
+                <button class="add-row" type="button" data-add-row="ltdRows"><i class="fa-solid fa-plus" aria-hidden="true"></i> Add director / PSC</button>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="section" id="itFields" hidden>
+          <legend class="section-heading"><span class="section-number">04</span><h2>Trustee board &amp; aims</h2><span class="section-hint">Incorporated trustees</span></legend>
+          <div class="section-body">
+            <div class="field full">
+              <span class="field-label">Trustee board list</span>
+              <div class="table-wrap">
+                <table class="stakeholder-table">
+                  <thead><tr><th scope="col">Trustee name</th><th scope="col">Role</th><th scope="col"><span class="visually-hidden">Remove</span></th></tr></thead>
+                  <tbody id="trusteeRows">
+                    <tr><td><span id="primaryTrusteeName">Primary applicant</span></td><td>Primary trustee</td><td></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-tools">
+                <span class="table-note">The primary applicant is included automatically.</span>
+                <button class="add-row" type="button" data-add-row="trusteeRows"><i class="fa-solid fa-plus" aria-hidden="true"></i> Add trustee</button>
+              </div>
+            </div>
+            <div class="field full">
+              <label for="objectives">Aims and objectives clause</label>
+              <textarea id="objectives" name="objectives" placeholder="State the organisation's aims and objectives">{{ form.objectives.value|default:'' }}</textarea>
+              {% for error in form.objectives.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+        </fieldset>
+
+        <section class="section" id="bnFields">
+          <div class="section-heading"><span class="section-number">04</span><h2>Business details</h2><span class="section-hint">Registration information</span></div>
+          <div class="section-body">
+            <div class="field">
+              <label for="nature_category">Nature category</label>
+              <input id="nature_category" name="nature_category" type="text" maxlength="255" value="{{ form.nature_category.value|default:'' }}" placeholder="e.g. Trading, consulting, services">
+              {% for error in form.nature_category.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field">
+              <label for="business_type">Business type</label>
+              <input id="business_type" name="business_type" type="text" maxlength="255" value="{{ form.business_type.value|default:'' }}" placeholder="e.g. Sole proprietorship">
+              {% for error in form.business_type.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="field full">
+              <label for="objectives_bn">General nature / business activities</label>
+              <textarea id="objectives_bn" name="objectives" placeholder="Describe the principal business activities">{{ form.objectives.value|default:'' }}</textarea>
+            </div>
+          </div>
+        </section>
+      </form>
+    </main>
+  </div>
+
+  <footer class="action-footer">
+    <div class="sync-note"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Records saved here automatically sync with your ProCAC Chrome Extension. Drafts stay in your registry until generated.</div>
+    <div class="actions">
+      <button class="button" type="submit" form="intakeForm" name="action" value="draft" formnovalidate><i class="fa-regular fa-floppy-disk" aria-hidden="true"></i> Save Draft Record</button>
+      <button class="button button-primary" type="submit" form="intakeForm" name="action" value="generate"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i> Save &amp; Generate CAC Payload</button>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const form = document.getElementById('intakeForm');
+      const entityType = document.getElementById('id_entity_type');
+      const nameField = document.getElementById('proposed_name_1');
+      const typeButtons = [...document.querySelectorAll('.registration-tabs button')];
+      const ninInput = document.getElementById('nin');
+      const result = document.getElementById('ninResult');
+      const directorsInput = document.getElementById('id_directors_json');
+      const ltdRows = document.getElementById('ltdRows');
+      const trusteeRows = document.getElementById('trusteeRows');
+
+      function selectType(type) {
+        entityType.value = type;
+        typeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.type === type)));
+        document.getElementById('ltdFields').hidden = type !== 'LTD';
+        document.getElementById('itFields').hidden = type !== 'IT';
+        document.getElementById('bnFields').hidden = type !== 'BN';
+        document.getElementById('objectives').disabled = type !== 'IT';
+        document.getElementById('objectives_bn').disabled = type !== 'BN';
+      }
+
+      typeButtons.forEach(button => button.addEventListener('click', () => selectType(button.dataset.type)));
+      selectType(entityType.value || 'BN');
+      document.getElementById('primary_full_name').addEventListener('input', event => {
+        const name = event.target.value.trim() || 'Primary applicant';
+        document.getElementById('primaryShareName').textContent = name;
+        document.getElementById('primaryTrusteeName').textContent = name;
+      });
+
+      document.getElementById('validateNin').addEventListener('click', () => {
+        const valid = /^\d{11}$/.test(ninInput.value.trim());
+        result.textContent = valid ? 'NIN format is valid: 11 digits.' : 'Enter an 11-digit NIN to validate the format.';
+        result.className = `nin-result ${valid ? 'valid' : 'invalid'}`;
+      });
+
+      function addRow(tbody, type) {
+        const row = document.createElement('tr');
+        row.dataset.stakeholderRow = type;
+        const fields = type === 'ltd'
+          ? [
+              ['full_name', 'Director or PSC name', 'text'],
+              ['share_allocation', 'Share allocation (%)', 'number'],
+              ['designation', 'Director / PSC', 'text']
+            ]
+          : [
+              ['full_name', 'Trustee name', 'text'],
+              ['designation', 'Trustee role', 'text']
+            ];
+        fields.forEach(([key, placeholder, inputType]) => {
+          const cell = document.createElement('td');
+          const input = document.createElement('input');
+          input.type = inputType;
+          input.dataset.key = key;
+          input.placeholder = placeholder;
+          if (inputType === 'number') {
+            input.min = '0';
+            input.max = '100';
+            input.step = '0.01';
+          }
+          input.setAttribute('aria-label', placeholder);
+          cell.append(input);
+          row.append(cell);
+        });
+        const removeCell = document.createElement('td');
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'remove-row';
+        removeButton.setAttribute('aria-label', `Remove ${type === 'ltd' ? 'director or PSC' : 'trustee'}`);
+        removeButton.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+        removeButton.addEventListener('click', () => row.remove());
+        removeCell.append(removeButton);
+        row.append(removeCell);
+        tbody.append(row);
+      }
+
+      function restoreStakeholders() {
+        let saved;
+        try {
+          saved = JSON.parse(directorsInput.value || '[]');
+        } catch {
+          return;
+        }
+        if (!Array.isArray(saved) || !saved.length || !saved[0] || typeof saved[0] !== 'object') return;
+
+        const primary = saved[0];
+        document.getElementById('primary_full_name').value = primary.full_name || '';
+        document.getElementById('primaryShareName').textContent = primary.full_name || 'Primary applicant';
+        document.getElementById('primaryTrusteeName').textContent = primary.full_name || 'Primary applicant';
+        document.getElementById('gender').value = primary.gender || '';
+        document.getElementById('email').value = document.getElementById('email').value || primary.email || '';
+        document.getElementById('phone').value = document.getElementById('phone').value || primary.phone || '';
+        document.getElementById('street_address').value = document.getElementById('street_address').value || primary.residential_address || '';
+        document.getElementById('primary_share_allocation').value = primary.share_allocation || '';
+
+        saved.slice(1).forEach(stakeholder => {
+          if (!stakeholder || typeof stakeholder !== 'object') return;
+          const type = entityType.value === 'LTD' ? 'ltd' : entityType.value === 'IT' ? 'trustee' : '';
+          if (!type) return;
+          const tbody = type === 'ltd' ? ltdRows : trusteeRows;
+          addRow(tbody, type);
+          const row = tbody.lastElementChild;
+          row.querySelectorAll('[data-key]').forEach(input => {
+            input.value = stakeholder[input.dataset.key] || '';
+          });
+        });
+      }
+
+      document.querySelectorAll('[data-add-row]').forEach(button => {
+        button.addEventListener('click', () => {
+          addRow(document.getElementById(button.dataset.addRow), button.dataset.addRow === 'ltdRows' ? 'ltd' : 'trustee');
+        });
+      });
+      restoreStakeholders();
+
+      form.addEventListener('submit', () => {
+        const primary = {
+          full_name: document.getElementById('primary_full_name').value.trim(),
+          gender: document.getElementById('gender').value,
+          identity_type: 'nin',
+          identity_number: ninInput.value.trim(),
+          email: document.getElementById('email').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          residential_address: document.getElementById('street_address').value.trim(),
+          designation: entityType.value === 'IT' ? 'Trustee' : 'Primary applicant'
+        };
+        const primaryShareAllocation = document.getElementById('primary_share_allocation').value;
+        if (primaryShareAllocation) primary.share_allocation = primaryShareAllocation;
+        const stakeholders = [...document.querySelectorAll('[data-stakeholder-row]')].map(row => {
+          const details = {};
+          row.querySelectorAll('[data-key]').forEach(input => {
+            const value = input.value.trim();
+            if (value) details[input.dataset.key] = value;
+          });
+          return details;
+        }).filter(details => Object.keys(details).length);
+        directorsInput.value = JSON.stringify([primary, ...stakeholders]);
+        document.getElementById('id_entity_name').value = nameField.value.trim();
+      });
+    })();
+  </script>
+</body>
+</html>

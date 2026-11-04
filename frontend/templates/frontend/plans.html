@@ -1,0 +1,398 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include "frontend/favicon.html" %}
+  <title>Plans &amp; Subscriptions | ProCAC</title>
+  <meta name="description" content="Compare ProCAC subscription plans and manage your consultant workspace.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="{% static 'frontend/assets/js/payments.js' %}" defer></script>
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --canvas: #f7f8fa;
+      --blue: #2563eb;
+      --sidebar: #0b1329;
+      --sidebar-width: 232px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button { font: inherit; }
+    a { color: inherit; }
+    [hidden] { display: none !important; }
+
+    .sidebar {
+      position: fixed;
+      z-index: 20;
+      inset: 0 auto 0 0;
+      display: flex;
+      width: var(--sidebar-width);
+      flex-direction: column;
+      border-right: 1px solid #1b2742;
+      color: #cbd5e1;
+      background: var(--sidebar);
+    }
+    .brand {
+      display: flex;
+      min-height: 66px;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      border-bottom: 1px solid #1b2742;
+      text-decoration: none;
+    }
+    .brand-mark { width: 29px; height: 29px; object-fit: contain; }
+    .brand-wordmark { width: 112px; height: auto; filter: brightness(0) invert(1); }
+    .nav-label { padding: 18px 18px 7px; color: #8290a9; font-size: 9px; font-weight: 650; letter-spacing: .11em; text-transform: uppercase; }
+    .sidebar-nav { display: grid; gap: 3px; padding: 0 9px; }
+    .sidebar-nav a {
+      display: flex;
+      min-height: 36px;
+      align-items: center;
+      gap: 11px;
+      padding: 0 10px;
+      border-radius: 4px;
+      color: #aab5c8;
+      font-size: 11px;
+      text-decoration: none;
+    }
+    .sidebar-nav a:hover { color: #fff; background: #17233c; }
+    .sidebar-nav a[aria-current="page"] { color: #fff; background: #172c52; }
+    .sidebar-nav i { width: 15px; color: #8da1c3; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding: 13px 18px; border-top: 1px solid #1b2742; color: #8997ae; font-size: 10px; }
+
+    .workspace { min-height: 100vh; margin-left: var(--sidebar-width); }
+    .topbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.97);
+    }
+    .breadcrumb { color: #7b8494; font-size: 11px; }
+    .breadcrumb strong { color: #263043; font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .quick-summary { color: #687386; font-size: 10px; white-space: nowrap; }
+    .profile-pill { display: flex; align-items: center; gap: 8px; color: #374151; font-size: 10px; font-weight: 550; }
+    .profile-avatar {
+      display: grid;
+      width: 27px;
+      height: 27px;
+      place-items: center;
+      border: 1px solid #dfe4eb;
+      border-radius: 50%;
+      color: #475569;
+      background: #f4f6f9;
+      font-size: 9px;
+      font-weight: 650;
+    }
+    main { width: min(1120px, 100%); margin: 0 auto; padding: 25px 28px 40px; }
+    .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
+    .eyebrow { margin-bottom: 4px; color: #64748b; font-size: 9px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0 0 4px; color: var(--ink); font-size: 21px; font-weight: 650; letter-spacing: -.035em; line-height: 1.2; }
+    .page-heading p { margin: 0; color: var(--muted); font-size: 11px; }
+
+    .subscription-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 18px;
+      padding: 11px 13px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .status-primary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .tier-badge {
+      display: inline-flex;
+      min-height: 25px;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      border: 1px solid #d9e3f7;
+      color: #35558f;
+      background: #f5f8fe;
+      font-size: 9px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .tier-badge.inactive { border-color: #e4e8ee; color: #657185; background: #f8f9fb; }
+    .status-expiry { color: #667085; font-size: 10px; }
+    .usage-block { display: flex; min-width: 190px; align-items: center; gap: 9px; }
+    .usage-value { color: #374151; font-size: 10px; white-space: nowrap; }
+    .usage-track { width: 100px; height: 5px; overflow: hidden; background: #edf0f3; }
+    .usage-fill { height: 100%; background: #4b78d1; }
+    .usage-unlimited { color: #667085; font-size: 9px; white-space: nowrap; }
+
+    .notice { margin-bottom: 11px; padding: 9px 11px; border: 1px solid #cae7d8; color: #216645; background: #f4fbf7; font-size: 10px; }
+    .notice.error { border-color: #efc7c3; color: #8f2821; background: #fff7f6; }
+    #payment-error { margin-bottom: 12px; padding: 10px 12px; border: 1px solid #efc7c3; color: #8f2821; background: #fff7f6; font-size: 11px; }
+    #payment-login-link { margin-left: 6px; color: #1d4ed8; font-weight: 600; }
+
+    .pricing-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 20px 0 10px; }
+    .pricing-heading h2 { margin: 0; color: #202a3a; font-size: 12px; font-weight: 600; }
+    .pricing-heading span { color: #818b9b; font-size: 9px; }
+    .plan-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; align-items: stretch; }
+    .plan-card {
+      display: flex;
+      min-width: 0;
+      min-height: 326px;
+      flex-direction: column;
+      padding: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .plan-card.popular { border-color: #b7c9ed; }
+    .plan-card.ultimate { border-color: #cbd5e1; }
+    .plan-topline { display: flex; min-height: 19px; align-items: center; justify-content: space-between; gap: 6px; color: #788294; font-size: 9px; font-weight: 550; text-transform: uppercase; letter-spacing: .04em; }
+    .plan-flag { padding: 3px 6px; border: 1px solid #d9e3f7; color: #35558f; background: #f5f8fe; font-size: 8px; font-weight: 650; letter-spacing: .02em; }
+    .plan-flag.ultimate-flag { border-color: #dce2e9; color: #3e4859; background: #f8f9fb; }
+    .plan-card h3 { margin: 8px 0 3px; color: #172033; font-size: 16px; font-weight: 650; letter-spacing: -.02em; }
+    .plan-description { min-height: 30px; margin: 0; color: #758093; font-size: 9px; }
+    .plan-price { margin: 14px 0 1px; color: #0f172a; font-size: 24px; font-weight: 650; letter-spacing: -.04em; line-height: 1.1; }
+    .plan-period { color: #788294; font-size: 9px; }
+    .plan-limit { margin: 12px 0 0; padding: 9px 0; border-top: 1px solid #edf0f3; border-bottom: 1px solid #edf0f3; color: #364154; font-size: 10px; font-weight: 600; }
+    .plan-features { display: grid; gap: 8px; margin: 11px 0 14px; padding: 0; color: #566174; font-size: 9px; list-style: none; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 7px; }
+    .plan-features i { margin-top: 2px; color: #37805b; font-size: 9px; }
+    .subscribe-button {
+      display: inline-flex;
+      min-height: 34px;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin-top: auto;
+      padding: 0 9px;
+      border: 1px solid #d6dce5;
+      border-radius: 5px;
+      color: #344054;
+      background: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .subscribe-button:hover { border-color: #aab5c5; background: #f8f9fb; }
+    .subscribe-button.primary { border-color: #2563eb; color: #fff; background: #2563eb; }
+    .subscribe-button.primary:hover { border-color: #1d4ed8; background: #1d4ed8; }
+    .subscribe-button:disabled { cursor: wait; opacity: .7; }
+    .subscribe-button:focus-visible, a:focus-visible { outline: 2px solid rgba(37,99,235,.55); outline-offset: 2px; }
+    .checkout-spinner { width: 12px; height: 12px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .pricing-footnote { margin: 12px 0 0; color: #8791a0; font-size: 9px; }
+
+    @media (max-width: 1080px) {
+      .plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .plan-card { min-height: 300px; }
+    }
+    @media (max-width: 1000px) {
+      :root { --sidebar-width: 64px; }
+      .brand { justify-content: center; padding-inline: 8px; }
+      .brand-wordmark, .nav-label, .sidebar-nav span, .sidebar-footer { display: none; }
+      .sidebar-nav { padding-inline: 8px; }
+      .sidebar-nav a { justify-content: center; padding-inline: 0; }
+      .sidebar-nav i { font-size: 14px; }
+    }
+    @media (max-width: 700px) {
+      :root { --sidebar-width: 0px; }
+      .sidebar { position: sticky; top: 0; width: 100%; height: 51px; flex-direction: row; border-right: 0; border-bottom: 1px solid #1b2742; }
+      .brand { width: 53px; min-height: 50px; flex: 0 0 53px; border-right: 1px solid #1b2742; border-bottom: 0; }
+      .sidebar-nav { display: flex; flex: 1; align-items: center; justify-content: space-around; padding: 0 5px; }
+      .sidebar-nav a { min-width: 34px; min-height: 35px; }
+      .workspace { margin-left: 0; }
+      .topbar { position: relative; min-height: 53px; gap: 8px; padding: 0 12px; }
+      .topbar-right { gap: 8px; }
+      .breadcrumb { font-size: 9px; }
+      .quick-summary { display: none; }
+      .profile-pill > span:last-child { display: none; }
+      main { padding: 19px 12px 30px; }
+      .subscription-status { align-items: flex-start; flex-direction: column; }
+      .usage-block { width: 100%; }
+      .usage-track { flex: 1; }
+      .plan-grid { gap: 8px; }
+      .plan-card { min-height: 315px; padding: 11px; }
+    }
+    @media (max-width: 480px) {
+      .breadcrumb span:not(.current) { display: none; }
+      .plan-grid { grid-template-columns: 1fr; }
+      .plan-card { min-height: 0; }
+      .plan-description { min-height: 0; }
+      .plan-features { margin-bottom: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <form id="payment-csrf-token" hidden>{% csrf_token %}</form>
+  <aside class="sidebar" aria-label="Workspace navigation">
+    <a class="brand" href="{% url 'home' %}" aria-label="ProCAC home">
+      <img class="brand-mark" src="{% static 'frontend/assets/images/logo/favicon-removebg-preview.png' %}" alt="">
+      <img class="brand-wordmark" src="{% static 'frontend/assets/images/logo/procac-wordmark.png' %}" alt="ProCAC">
+    </a>
+    <div class="nav-label">Workspace</div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" title="Clients"><i class="fa-solid fa-table-list" aria-hidden="true"></i><span>Clients</span></a>
+      <a href="{% url 'intake' %}" title="New intake"><i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>New intake</span></a>
+      <a href="{% url 'agency_profile' %}" title="Agency profile"><i class="fa-regular fa-building" aria-hidden="true"></i><span>Agency profile</span></a>
+      <a href="{% url 'plans' %}" aria-current="page" title="Plans and billing"><i class="fa-regular fa-credit-card" aria-hidden="true"></i><span>Plans &amp; billing</span></a>
+    </nav>
+    <div class="sidebar-footer">Billing &amp; subscriptions</div>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <div class="breadcrumb"><span>ProCAC</span> <span aria-hidden="true">/</span> <strong class="current">Billing &amp; Subscriptions</strong></div>
+      <div class="topbar-right">
+        <span class="quick-summary">
+          {% if active_subscription %}{{ active_plan_label }} active{% else %}{{ clients_used }} client{{ clients_used|pluralize }} in registry{% endif %}
+        </span>
+        <div class="profile-pill" aria-label="Signed in as {{ request.user.get_full_name|default:request.user.email }}">
+          <span class="profile-avatar" aria-hidden="true">{{ request.user.get_full_name|default:request.user.email|slice:":1"|upper }}</span>
+          <span>{{ request.user.get_full_name|default:request.user.email }}</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">Account / Billing</div>
+          <h1>Plans &amp; subscriptions</h1>
+          <p>Review your current access and choose the plan that fits your filing volume.</p>
+        </div>
+      </div>
+
+      <section class="subscription-status" aria-label="Current subscription status">
+        <div class="status-primary">
+          {% if active_subscription %}
+            <span class="tier-badge"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>{{ active_plan_label }} Plan · Active</span>
+            <span class="status-expiry">
+              {% if active_subscription.expires_at %}
+                Expires {{ active_subscription.expires_at|date:'M j, Y' }}
+              {% else %}
+                Renewal date not recorded
+              {% endif %}
+            </span>
+          {% else %}
+            <span class="tier-badge inactive"><i class="fa-regular fa-circle" aria-hidden="true"></i>{{ active_plan_label }} Plan · Inactive</span>
+            <span class="status-expiry">Choose a plan to activate subscription access.</span>
+          {% endif %}
+        </div>
+        <div class="usage-block">
+          {% if total_plan_limit %}
+            <span class="usage-value">{{ clients_used }} / {{ total_plan_limit }} client profiles utilized</span>
+            <div class="usage-track" role="progressbar" aria-label="Client profile quota" aria-valuemin="0" aria-valuemax="{{ total_plan_limit }}" aria-valuenow="{{ clients_used }}">
+              <div class="usage-fill" style="width: {{ profile_usage_percent }}%"></div>
+            </div>
+          {% else %}
+            <span class="usage-value">{{ clients_used }} client profile{{ clients_used|pluralize }} utilized</span>
+            <span class="usage-unlimited">Unlimited quota</span>
+          {% endif %}
+        </div>
+      </section>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="notice{% if message.tags == 'error' %} error{% endif %}" role="status">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      <div id="payment-error" role="alert" aria-live="assertive" hidden>
+        <span id="payment-error-message" data-payment-error-message></span>
+        <a id="payment-login-link" data-payment-login-link href="{% url 'login' %}?next={% url 'plans' %}" hidden>Sign in</a>
+      </div>
+
+      <div class="pricing-heading">
+        <h2>Choose a subscription tier</h2>
+        <span>Secure checkout powered by Paystack</span>
+      </div>
+      <section class="plan-grid" aria-label="Available subscription plans">
+        <article class="plan-card">
+          <div class="plan-topline"><span>Daily access</span></div>
+          <h3>Starter</h3>
+          <p class="plan-description">For occasional consultant filings.</p>
+          <div class="plan-price">₦500</div>
+          <div class="plan-period">per day</div>
+          <div class="plan-limit">Up to 5 client profiles</div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Client registry and filing setup</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>CAC portal autofill extension</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Standard support</span></li>
+          </ul>
+          <button type="button" class="subscribe-button" data-subscribe-plan="starter">Choose Starter</button>
+        </article>
+
+        <article class="plan-card">
+          <div class="plan-topline"><span>Weekly access</span></div>
+          <h3>Standard</h3>
+          <p class="plan-description">For a regular filing schedule.</p>
+          <div class="plan-price">₦3,000</div>
+          <div class="plan-period">per week</div>
+          <div class="plan-limit">Up to 15 client profiles</div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>5 Business Names (BN)</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>5 Limited Companies (LTD)</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>5 Incorporated Trustees (IT)</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Extension autofill support</span></li>
+          </ul>
+          <button type="button" class="subscribe-button" data-subscribe-plan="standard">Choose Standard</button>
+        </article>
+
+        <article class="plan-card popular">
+          <div class="plan-topline"><span>Monthly access</span><span class="plan-flag">Popular</span></div>
+          <h3>Enterprise</h3>
+          <p class="plan-description">For higher-volume firms and busy teams.</p>
+          <div class="plan-price">₦10,000</div>
+          <div class="plan-period">per month</div>
+          <div class="plan-limit">Up to 25 client profiles</div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>BN, LTD and IT filing types</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>CAC portal autofill extension</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Client registry and filing payloads</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Priority support</span></li>
+          </ul>
+          <button type="button" class="subscribe-button primary" data-subscribe-plan="enterprise">Choose Enterprise</button>
+        </article>
+
+        <article class="plan-card ultimate">
+          <div class="plan-topline"><span>Extended access</span><span class="plan-flag ultimate-flag">Ultimate</span></div>
+          <h3>Platinum</h3>
+          <p class="plan-description">For firms with extensive filing operations.</p>
+          <div class="plan-price">₦35,000</div>
+          <div class="plan-period">per 2 months</div>
+          <div class="plan-limit">Unlimited client profiles</div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>BN, LTD and IT autofill support</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Full extension access</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>NIN document OCR auto-extract</span></li>
+            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Priority firm support</span></li>
+          </ul>
+          <button type="button" class="subscribe-button" data-subscribe-plan="ultimate_enterprise">Choose Platinum</button>
+        </article>
+      </section>
+      <p class="pricing-footnote">All subscription payments are processed securely. Profile limits apply to records in your ProCAC client registry.</p>
+    </main>
+  </div>
+</body>
+</html>

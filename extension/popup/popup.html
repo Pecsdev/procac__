@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ProCAC Client Autofill</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>ProCAC</h1>
+        <p>Client Autofill</p>
+      </header>
+
+      <p id="account-status" role="status" aria-live="polite">Checking account…</p>
+      <p id="subscription-tier" class="muted"></p>
+
+      <label for="extension-key">ProCAC extension key</label>
+      <div class="key-row">
+        <input id="extension-key" type="password" autocomplete="off" placeholder="Paste key from Agency Profile">
+        <button id="save-key" class="secondary" type="button">Save key</button>
+      </div>
+
+      <label for="client-list">Saved client</label>
+      <select id="client-list" disabled>
+        <option value="">Loading profiles…</option>
+      </select>
+
+      <button id="fill-button" type="button" disabled>Fill CAC form</button>
+      <button id="login-button" class="secondary" type="button" hidden>Open ProCAC sign in</button>
+      <p id="message" class="muted" role="status" aria-live="polite"></p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
